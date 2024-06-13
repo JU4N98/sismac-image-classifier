@@ -3,8 +3,14 @@ import json
 import pytesseract
 from PIL import Image
 
-MIN_T = 0;
-MAX_T = 200;
+MIN_T = 0
+MAX_T = 200
+
+def rename_images():
+    dirname = "./dataset_raw"
+    for i, filename in enumerate(os.listdir(dirname)):
+        print(filename)
+        os.rename(dirname + "/" + filename, dirname + "/" + str(i) + ".jpg")
 
 def get_distance(pixel_1:tuple, pixel_2:tuple) -> int:
     """
