@@ -1,0 +1,7 @@
+0: sin defectos
+1: sobrecarga en 1 fase
+2: sobrecarga en 2 fases
+3: sobrecarga en 3 fases
+4: alta resistencia de contacto
+5: falta de ventilacion en tablero 
+6: falta de fase
