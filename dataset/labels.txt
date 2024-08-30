@@ -3,5 +3,6 @@
 2: sobrecarga en 2 fases
 3: sobrecarga en 3 fases
 4: alta resistencia de contacto
-5: falta de ventilacion en tablero 
+5: falta de ventilacion/espacio en tablero 
 6: falta de fase
+7: sobrecarga 

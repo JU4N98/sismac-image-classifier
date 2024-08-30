@@ -98,8 +98,6 @@ def get_temperatures(image) -> list:
         i += 1
 
     return sorted(temperatures)
-    
-
 
 def to_greyscale(file_name:str, rgb_to_grey:dict):
     """
