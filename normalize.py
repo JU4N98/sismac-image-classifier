@@ -1,10 +1,12 @@
 import os 
+from pathlib import Path
 import json
 import pytesseract
 from PIL import Image
 
 MIN_T = 0
-MAX_T = 200
+MAX_T = 300
+pytesseract.pytesseract.tesseract_cmd = os.path.join(Path.home(),"AppData/Local/Programs/Tesseract-OCR/tesseract.exe")
 
 def rename_images():
     dirname = "./dataset_raw"
@@ -99,12 +101,12 @@ def get_temperatures(image) -> list:
 
     return sorted(temperatures)
 
-def to_greyscale(file_name:str, rgb_to_grey:dict):
+def to_greyscale(path:str, filename: str, rgb_to_grey:dict):
     """
         Generates greyscale image in absolute scale from rgb one.
     """
     
-    file = Image.open("./dataset/" + file_name)
+    file = Image.open(os.path.join(path,filename))
     image = file.load()
 
     temperatures = get_temperatures(image)
@@ -122,7 +124,13 @@ def to_greyscale(file_name:str, rgb_to_grey:dict):
     
     new_image = Image.new("L",(234,259))
     new_image.putdata(greyscale_image)
-    new_image.save("./normalized-dataset/"+file_name)
+    new_image.save("./normalized-dataset/"+filename)
+
+def normalize_all(path: str, rgb_to_grey: dict):
+    for filename in os.listdir(path):
+        file_path = os.path.join(path, filename)
+        print(f"Normalizing file: {file_path}")
+        to_greyscale(path, filename, rgb_to_grey)
 
 # rgb_to_grey = get_mapping()
-# to_greyscale("sample.jpg", rgb_to_grey)
+# normalize_all("./dataset_raw", rgb_to_grey)
