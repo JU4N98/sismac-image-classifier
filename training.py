@@ -5,6 +5,8 @@ from tensorflow.keras import layers, models
 import csv
 from PIL import Image
 import numpy as np
+from sklearn.model_selection import StratifiedKFold
+from random import randint
 
 """ 
 Parameters of the model: 
@@ -30,6 +32,9 @@ neural network.
 """
 
 INPUT_SHAPE = (234,259,1)
+K_FOLD = 5
+EPOCHS = 20
+kfold = StratifiedKFold(n_splits=K_FOLD, shuffle=True)
 
 def get_layer_description(nol: int):
     description = []
@@ -37,11 +42,11 @@ def get_layer_description(nol: int):
     l2 = nol-(nol+2)//3
     for i in range(nol):
         if i < l1:
-            description.append({"sof":7, "nof":16})
+            description.append({"sof":7, "nof":16, "pl": False})
         elif i < l2:
-             description.append({"sof":5, "nof":32})
+             description.append({"sof":5, "nof":32, "pl": False})
         else:
-            description.append({"sof":3, "nof":64})
+            description.append({"sof":3, "nof":64, "pl": True})
     return description
 
 
@@ -59,37 +64,84 @@ def create_model(nol: int, nod: int, af: str, op: str, lo: str):
 
     # Adds Conv2D layers
     ld = get_layer_description(nol)
-    print(ld)
     for i in range(nol):
         nof = ld[i]["nof"]
         sof = ld[i]["sof"]
+        pl = ld[i]["pl"]
         if i==0:
             model.add(layers.Conv2D(nof, (sof,sof), activation=af, input_shape=INPUT_SHAPE))
         else:
             model.add(layers.Conv2D(nof, (sof,sof), activation=af))
+            if pl:
+                model.add(layers.MaxPooling2D(pool_size=(2, 2)))
     
     # Adds flattening layer
-    model.add(layers.MaxPooling2D(pool_size=(2, 2)))
     model.add(layers.Flatten())
     
     # Adds dense and dropout layers
-    model.add(layers.Dropout(0.5))
+    # model.add(layers.Dropout(0.5))
     for i in range(nod):
         model.add(layers.Dense(64, activation="relu"))
-        model.add(layers.Dropout(0.5))
+        # model.add(layers.Dropout(0.5))
 
-    model.add(layers.Dense(2, activation="softmax"))
+    model.add(layers.Dense(1, activation="sigmoid"))
 
     # Compiles model
     model.compile(optimizer=op, 
               loss=lo, 
               metrics=['accuracy'])
+    
+    model.summary()
 
     return model
 
-def train(params: dict, images: list, labels: list):
-    to_train = create_model(params["nol"],params["nod"],params["af"],params["op"],params["lo"])
+def oversampling(images: list, labels: list, target: list):
+    """
+    Oversamples dataset.
+    """
+    cur = len(images)
+    while len(images)<target:
+        rand = randint(0,cur-1)
+        images.append(images[rand])
+        labels.append(labels[rand])
 
+def split(images, labels):
+    ret = {}
+    for i in range(len(images)):
+        if labels[i] in ret:
+            ret[labels[i]].append(images[i])
+        else:
+            ret[labels[i]] = [images[i]]
+    return ret
+
+def train(params: dict, images: list, labels: list):
+    # Creates folds and balances labels
+    images_train = [[]]*K_FOLD
+    labels_train = [[]]*K_FOLD
+    images_val = [[]]*K_FOLD
+    labels_val = [[]]*K_FOLD
+    fold = 0
+    for train_idx, val_idx in kfold.split(images, labels):
+        maximum = 0
+        for key, value in split(np.array(images)[train_idx], np.array(labels)[train_idx]).items():
+            maximum = max(maximum, len(value))
+        for key, value in split(np.array(images)[train_idx], np.array(labels)[train_idx]).items():
+            images_to_add = value
+            labels_to_add = [key]*len(value)
+            oversampling(images_to_add,labels_to_add,maximum)
+            images_train[fold].extend(images_to_add)
+            labels_train[fold].extend(labels_to_add)
+        images_val[fold].extend(np.array(images)[val_idx])
+        labels_val[fold].extend(np.array(labels)[val_idx])
+        fold += 1
+    
+
+    # trains and evaluates the model
+    for f in range(K_FOLD):
+        model = create_model(params["nol"],params["nod"],params["af"],params["op"],params["lo"])
+        model.fit(np.array(images_train[f]),np.array(labels_train[f]),epochs=EPOCHS)
+        model.evaluate(images_val[f], labels_val[f], verbose=0)
+        
 def get_dataset_0():
     """
     Returns dataset for the first CNNs which classifies images between "sin defectos" (0) and "con defectos" (1).
@@ -100,8 +152,8 @@ def get_dataset_0():
     with open(csv_file, mode='r') as file:
         csv_reader = csv.reader(file)
         header = next(csv_reader)
-        image = np.array(Image.open(os.path.join("./dataset_normalized",row[0]+".jpg")))
         for row in csv_reader:
+            image = np.array(Image.open(os.path.join("./dataset_normalized",row[0]+".jpg")))
             if row[1].count("0"):
                 labels.append(0)
                 images.append(image)
@@ -110,7 +162,6 @@ def get_dataset_0():
                 images.append(image)
     return images, labels
 
-
 def backtracking(idx: int, parameters: list, values: dict, chosen: dict, images: list, labels: list):
     if idx == len(parameters):
         train(chosen,images,labels)
@@ -118,7 +169,7 @@ def backtracking(idx: int, parameters: list, values: dict, chosen: dict, images:
     
     for val in values[parameters[idx]]:
         chosen[parameters[idx]] = val
-        backtracking(idx+1,parameters,values,chosen)
+        backtracking(idx+1,parameters,values,chosen,images,labels)
     
     return
 
@@ -132,10 +183,10 @@ parameters_values = {
 }
 
 parameters_values2 = {
-    "nol" : [3],
+    "nol" : [10],
     "nod" : [2],
     "af" : ["relu"],
-    "op" : ["sgd"],
+    "op" : ["adam"],
     "lo" : ["binary_crossentropy"]
 }
 

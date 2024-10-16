@@ -12,7 +12,6 @@ pytesseract.pytesseract.tesseract_cmd = os.path.join(Path.home(),"AppData/Local/
 def rename_images():
     dirname = "./dataset_raw"
     for i, filename in enumerate(os.listdir(dirname)):
-        print(filename)
         os.rename(dirname + "/" + filename, dirname + "/" + str(i) + ".jpg")
 
 def get_distance(pixel_1:tuple, pixel_2:tuple) -> int:
