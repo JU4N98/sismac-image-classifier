@@ -1,10 +1,13 @@
 import os 
+from pathlib import Path
 import json
 import pytesseract
 from PIL import Image
+import csv
 
 MIN_T = 0
-MAX_T = 200
+MAX_T = 300
+pytesseract.pytesseract.tesseract_cmd = os.path.join(Path.home(),"AppData/Local/Programs/Tesseract-OCR/tesseract.exe")
 
 def rename_images():
     dirname = "./dataset_raw"
@@ -99,20 +102,20 @@ def get_temperatures(image) -> list:
 
     return sorted(temperatures)
 
-def to_greyscale(file_name:str, rgb_to_grey:dict):
+def to_greyscale(path:str, filename: str, rgb_to_grey:dict, min_t:float, max_t:float):
     """
         Generates greyscale image in absolute scale from rgb one.
     """
     
-    file = Image.open("./dataset/" + file_name)
+    file = Image.open(os.path.join(path,filename))
     image = file.load()
 
-    temperatures = get_temperatures(image)
-    if len(temperatures) != 2:
-        return
+    # temperatures = get_temperatures(image)
+    # if len(temperatures) != 2:
+    #     return
 
-    min_t = temperatures[0]
-    max_t = temperatures[1]
+    # min_t = temperatures[0]
+    # max_t = temperatures[1]
 
     greyscale_image = []
     for r in range (33,292):
@@ -122,7 +125,15 @@ def to_greyscale(file_name:str, rgb_to_grey:dict):
     
     new_image = Image.new("L",(234,259))
     new_image.putdata(greyscale_image)
-    new_image.save("./normalized-dataset/"+file_name)
+    new_image.save("./dataset_normalized/"+filename)
 
-# rgb_to_grey = get_mapping()
-# to_greyscale("sample.jpg", rgb_to_grey)
+def normalize_all():
+    rgb_to_grey = get_mapping()
+    csv_file = "./dataset/temperatures.csv"
+    with open(csv_file, mode='r') as file:
+        csv_reader = csv.reader(file)
+        header = next(csv_reader)
+        for row in csv_reader:
+            to_greyscale("./dataset_raw",row[0]+".jpg",rgb_to_grey,float(row[1]),float(row[2]))
+
+normalize_all()
