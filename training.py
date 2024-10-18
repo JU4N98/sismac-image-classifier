@@ -123,8 +123,15 @@ def save_history(history, name: str):
     plt.ylabel("Accuracy")
     plt.legend(loc="lower right")
     plt.savefig(name+".png")
-    plt.ylim(0, 1)
+    ax = plt.gca()
+    ax.set_ylim([0, 1])
     plt.clf()
+
+def save_accuracy(new_row):
+    print(new_row)
+    with open("./models/results_0.csv", mode='a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(new_row)
 
 def train(params: dict, images: list, labels: list):
     # Creates folds and balances labels
@@ -151,7 +158,8 @@ def train(params: dict, images: list, labels: list):
     for f in range(K_FOLD):
         model = create_model(params["nol"],params["nod"],params["af"],params["op"],params["lo"])
         history = model.fit(np.array(images_train[f]),np.array(labels_train[f]),shuffle=True,epochs=EPOCHS,validation_data=(np.array(images_val[f]), np.array(labels_val[f])))
-        save_history(history,str(f))
+        save_accuracy([str(params),history.history["accuracy"],history.history["val_accuracy"]])
+        # save_history(history,str(f))
 
 def get_dataset_0():
     """
@@ -187,20 +195,20 @@ def backtracking(idx: int, parameters: list, values: dict, chosen: dict, images:
 parameters = ["nol", "nod", "af", "op", "lo"]
 parameters_values = {
     "nol" : [3,4,5,6,7,8,9,10],
-    "nod" : [2,3,4,5],
-    "af" : ["relu", "sigmoid", "tanh"],
+    "nod" : [2,3,4],
+    "af" : ["relu"],
     "op" : ["sgd","adam","rmsprop"],
     "lo" : ["binary_crossentropy"]
 }
 
-parameters_values2 = {
-    "nol" : [10],
-    "nod" : [3],
-    "af" : ["relu"],
-    "op" : ["adam"],
-    "lo" : ["binary_crossentropy"]
-}
+# parameters_values2 = {
+#     "nol" : [10],
+#     "nod" : [3],
+#     "af" : ["relu"],
+#     "op" : ["adam"],
+#     "lo" : ["binary_crossentropy"]
+# }
 
 chosen = {}
 images, labels = get_dataset_0()
-backtracking(0,parameters,parameters_values2,chosen,images,labels)
+backtracking(0,parameters,parameters_values,chosen,images,labels)
