@@ -7,6 +7,7 @@ from PIL import Image
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
 from random import randint
+import matplotlib.pyplot as plt
 
 """ 
 Parameters of the model: 
@@ -31,9 +32,9 @@ As an alternative it's also possible to make the whole classification process in
 neural network.
 """
 
-INPUT_SHAPE = (234,259,1)
+INPUT_SHAPE = (78,86,1)
 K_FOLD = 5
-EPOCHS = 20
+EPOCHS = 5
 kfold = StratifiedKFold(n_splits=K_FOLD, shuffle=True)
 
 def get_layer_description(nol: int):
@@ -81,7 +82,7 @@ def create_model(nol: int, nod: int, af: str, op: str, lo: str):
     # Adds dense and dropout layers
     # model.add(layers.Dropout(0.5))
     for i in range(nod):
-        model.add(layers.Dense(64, activation="relu"))
+        model.add(layers.Dense(256, activation="relu"))
         # model.add(layers.Dropout(0.5))
 
     model.add(layers.Dense(1, activation="sigmoid"))
@@ -114,6 +115,17 @@ def split(images, labels):
             ret[labels[i]] = [images[i]]
     return ret
 
+def save_history(history, name: str):
+    plt.plot(history.history["accuracy"], label="Training Accuracy")
+    plt.plot(history.history["val_accuracy"], label="Validation Accuracy")
+    plt.title("Model Accuracy")
+    plt.xlabel("Epoch")
+    plt.ylabel("Accuracy")
+    plt.legend(loc="lower right")
+    plt.savefig(name+".png")
+    plt.ylim(0, 1)
+    plt.clf()
+
 def train(params: dict, images: list, labels: list):
     # Creates folds and balances labels
     images_train = [[]]*K_FOLD
@@ -134,14 +146,13 @@ def train(params: dict, images: list, labels: list):
         images_val[fold].extend(np.array(images)[val_idx])
         labels_val[fold].extend(np.array(labels)[val_idx])
         fold += 1
-    
 
     # trains and evaluates the model
     for f in range(K_FOLD):
         model = create_model(params["nol"],params["nod"],params["af"],params["op"],params["lo"])
-        model.fit(np.array(images_train[f]),np.array(labels_train[f]),epochs=EPOCHS)
-        model.evaluate(images_val[f], labels_val[f], verbose=0)
-        
+        history = model.fit(np.array(images_train[f]),np.array(labels_train[f]),shuffle=True,epochs=EPOCHS,validation_data=(np.array(images_val[f]), np.array(labels_val[f])))
+        save_history(history,str(f))
+
 def get_dataset_0():
     """
     Returns dataset for the first CNNs which classifies images between "sin defectos" (0) and "con defectos" (1).
@@ -184,7 +195,7 @@ parameters_values = {
 
 parameters_values2 = {
     "nol" : [10],
-    "nod" : [2],
+    "nod" : [3],
     "af" : ["relu"],
     "op" : ["adam"],
     "lo" : ["binary_crossentropy"]
