@@ -38,6 +38,10 @@ EPOCHS = 5
 kfold = StratifiedKFold(n_splits=K_FOLD, shuffle=True)
 
 def get_layer_description(nol: int):
+    """
+    Returns layer description, based on the number of layers. Each layer is described as size of filter,
+    number of filters and the use of pooling layer.
+    """
     description = []
     l1 = (nol+2)//3
     l2 = nol-(nol+2)//3
@@ -49,8 +53,6 @@ def get_layer_description(nol: int):
         else:
             description.append({"sof":3, "nof":64, "pl": True})
     return description
-
-
 
 def create_model(nol: int, nod: int, af: str, op: str, lo: str):
     """
@@ -116,6 +118,9 @@ def split(images, labels):
     return ret
 
 def save_history(history, name: str):
+    """
+    Saves a plot with the accuracy and validation accuracy of a model through the epochs.
+    """
     plt.plot(history.history["accuracy"], label="Training Accuracy")
     plt.plot(history.history["val_accuracy"], label="Validation Accuracy")
     plt.title("Model Accuracy")
@@ -128,12 +133,18 @@ def save_history(history, name: str):
     plt.clf()
 
 def save_accuracy(new_row):
+    """
+    Appends a row in a csv with the model description, accuracy and validation accuracy.
+    """
     print(new_row)
     with open("./models/results_0.csv", mode='a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(new_row)
 
 def train(params: dict, images: list, labels: list):
+    """
+    Trains and evaluates the model through each fold.
+    """
     # Creates folds and balances labels
     images_train = [[]]*K_FOLD
     labels_train = [[]]*K_FOLD
@@ -163,7 +174,7 @@ def train(params: dict, images: list, labels: list):
 
 def get_dataset_0():
     """
-    Returns dataset for the first CNNs which classifies images between "sin defectos" (0) and "con defectos" (1).
+    Returns dataset for the #1 CNNs which classifies images between "sin defectos" (0) and "con defectos" (1).
     """
     csv_file = "./dataset/labels.csv"
     images = []
@@ -181,7 +192,30 @@ def get_dataset_0():
                 images.append(image)
     return images, labels
 
+def get_dataset_1():
+    """
+    Returns dataset for the #2 CNNs which classifies images between "sobrecarga en 3 fases" (0) and "sobrecarga en mas de 1 o 2 fases" (1).
+    """
+    csv_file = "./dataset/labels.csv"
+    images = []
+    labels = []
+    with open(csv_file, mode='r') as file:
+        csv_reader = csv.reader(file)
+        header = next(csv_reader)
+        for row in csv_reader:
+            image = np.array(Image.open(os.path.join("./dataset_normalized",row[0]+".jpg")))
+            if row[1].count("3"):
+                labels.append(0)
+                images.append(image)
+            elif row[1].count("1") or row[1].count("2"):
+                labels.append(1)
+                images.append(image)
+    return images, labels
+
 def backtracking(idx: int, parameters: list, values: dict, chosen: dict, images: list, labels: list):
+    """
+    Evaluates each of the models that can be get from all combinations of parameters values.
+    """
     if idx == len(parameters):
         train(chosen,images,labels)
         return
@@ -194,7 +228,7 @@ def backtracking(idx: int, parameters: list, values: dict, chosen: dict, images:
 
 parameters = ["nol", "nod", "af", "op", "lo"]
 parameters_values = {
-    "nol" : [3,4,5,6,7,8,9,10],
+    "nol" : [6,7,8,9,10],
     "nod" : [2,3,4],
     "af" : ["relu"],
     "op" : ["sgd","adam","rmsprop"],
