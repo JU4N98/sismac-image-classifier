@@ -56,7 +56,7 @@ def get_layer_description(nol: int):
 
 def create_model(nol: int, nod: int, af: str, op: str, lo: str):
     """
-    Creates a tensorflow/keras model using the following parameters:
+    Creates a tensorflow/keras model for binary classification using the following parameters:
     :nol: number of layers.
     :af: activation function.
     :op: optimizer.
@@ -137,7 +137,7 @@ def save_accuracy(new_row):
     Appends a row in a csv with the model description, accuracy and validation accuracy.
     """
     print(new_row)
-    with open("./models/results_0.csv", mode='a', newline='') as file:
+    with open("./models/results_1.csv", mode='a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(new_row)
 
@@ -231,18 +231,10 @@ parameters_values = {
     "nol" : [3,4,5,6,7,8,9,10],
     "nod" : [2,3,4],
     "af" : ["relu"],
-    "op" : ["rmsprop"],
+    "op" : ["sgd","adam","rmsprop"],
     "lo" : ["binary_crossentropy"]
 }
 
-# parameters_values2 = {
-#     "nol" : [10],
-#     "nod" : [3],
-#     "af" : ["relu"],
-#     "op" : ["adam"],
-#     "lo" : ["binary_crossentropy"]
-# }
-
 chosen = {}
-images, labels = get_dataset_0()
+images, labels = get_dataset_1()
 backtracking(0,parameters,parameters_values,chosen,images,labels)
