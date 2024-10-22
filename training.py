@@ -228,10 +228,10 @@ def backtracking(idx: int, parameters: list, values: dict, chosen: dict, images:
 
 parameters = ["nol", "nod", "af", "op", "lo"]
 parameters_values = {
-    "nol" : [6,7,8,9,10],
+    "nol" : [3,4,5,6,7,8,9,10],
     "nod" : [2,3,4],
     "af" : ["relu"],
-    "op" : ["sgd","adam","rmsprop"],
+    "op" : ["rmsprop"],
     "lo" : ["binary_crossentropy"]
 }
 
