@@ -54,7 +54,7 @@ def get_layer_description(nol: int):
             description.append({"sof":3, "nof":64, "pl": True})
     return description
 
-def create_model(nol: int, nod: int, af: str, op: str, lo: str):
+def create_model_1(params:dict):
     """
     Creates a tensorflow/keras model for binary classification using the following parameters:
     :nol: number of layers.
@@ -62,6 +62,11 @@ def create_model(nol: int, nod: int, af: str, op: str, lo: str):
     :op: optimizer.
     :lo: loss function.
     """
+    nol = params["nol"]
+    nod = params["nod"]
+    af = params["af"]
+    op = params["op"]
+    lo = params["lo"]
 
     model = keras.Sequential()
 
@@ -132,16 +137,16 @@ def save_history(history, name: str):
     ax.set_ylim([0, 1])
     plt.clf()
 
-def save_accuracy(new_row):
+def save_accuracy(path:str, new_row:list):
     """
     Appends a row in a csv with the model description, accuracy and validation accuracy.
     """
     print(new_row)
-    with open("./models/results_2.csv", mode='a', newline='') as file:
+    with open(path, mode='a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(new_row)
 
-def train(params: dict, images: list, labels: list):
+def train(params: dict, images: list, labels: list, create_model, path:str):
     """
     Trains and evaluates the model through each fold.
     """
@@ -167,9 +172,9 @@ def train(params: dict, images: list, labels: list):
 
     # trains and evaluates the model
     for f in range(K_FOLD):
-        model = create_model(params["nol"],params["nod"],params["af"],params["op"],params["lo"])
+        model = create_model(params)
         history = model.fit(np.array(images_train[f]),np.array(labels_train[f]),shuffle=True,epochs=EPOCHS,validation_data=(np.array(images_val[f]), np.array(labels_val[f])))
-        save_accuracy([str(params),history.history["accuracy"],history.history["val_accuracy"]])
+        save_accuracy(path,[str(params),history.history["accuracy"],history.history["val_accuracy"]])
 
 def get_dataset_0():
     """
@@ -231,17 +236,17 @@ def get_dataset_2():
                 images.append(image)
     return images, labels
 
-def backtracking(idx: int, parameters: list, values: dict, chosen: dict, images: list, labels: list):
+def backtracking(idx: int, parameters: list, values: dict, chosen: dict, images: list, labels: list, create_model, path:str):
     """
     Evaluates each of the models that can be get from all combinations of parameters values.
     """
     if idx == len(parameters):
-        train(chosen,images,labels)
+        train(chosen,images,labels,create_model,path)
         return
     
     for val in values[parameters[idx]]:
         chosen[parameters[idx]] = val
-        backtracking(idx+1,parameters,values,chosen,images,labels)
+        backtracking(idx+1,parameters,values,chosen,images,labels,create_model,path)
     
     return
 
@@ -254,14 +259,15 @@ parameters_values = {
     "lo" : ["binary_crossentropy"]
 }
 
+# Model 1
 # chosen = {}
 # images, labels = get_dataset_0()
-# backtracking(0,parameters,parameters_values,chosen,images,labels)
+# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,"./models/model_1/results_0.csv")
 
 # chosen = {}
 # images, labels = get_dataset_1()
-# backtracking(0,parameters,parameters_values,chosen,images,labels)
+# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,"./models/model_1/results_1.csv")
 
-chosen = {}
-images, labels = get_dataset_2()
-backtracking(0,parameters,parameters_values,chosen,images,labels)
+# chosen = {}
+# images, labels = get_dataset_2()
+# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,"./models/model_1/results_2.csv")
