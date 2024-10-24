@@ -137,7 +137,7 @@ def save_accuracy(new_row):
     Appends a row in a csv with the model description, accuracy and validation accuracy.
     """
     print(new_row)
-    with open("./models/results_1.csv", mode='a', newline='') as file:
+    with open("./models/results_2.csv", mode='a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(new_row)
 
@@ -170,7 +170,6 @@ def train(params: dict, images: list, labels: list):
         model = create_model(params["nol"],params["nod"],params["af"],params["op"],params["lo"])
         history = model.fit(np.array(images_train[f]),np.array(labels_train[f]),shuffle=True,epochs=EPOCHS,validation_data=(np.array(images_val[f]), np.array(labels_val[f])))
         save_accuracy([str(params),history.history["accuracy"],history.history["val_accuracy"]])
-        # save_history(history,str(f))
 
 def get_dataset_0():
     """
@@ -212,6 +211,26 @@ def get_dataset_1():
                 images.append(image)
     return images, labels
 
+def get_dataset_2():
+    """
+    Returns dataset for the #3 CNNs which classifies images between "sobrecarga en 1 fase" (0) and "sobrecarga en 2 fases" (1).
+    """
+    csv_file = "./dataset/labels.csv"
+    images = []
+    labels = []
+    with open(csv_file, mode='r') as file:
+        csv_reader = csv.reader(file)
+        header = next(csv_reader)
+        for row in csv_reader:
+            image = np.array(Image.open(os.path.join("./dataset_normalized",row[0]+".jpg")))
+            if row[1].count("1"):
+                labels.append(0)
+                images.append(image)
+            elif row[1].count("2"):
+                labels.append(1)
+                images.append(image)
+    return images, labels
+
 def backtracking(idx: int, parameters: list, values: dict, chosen: dict, images: list, labels: list):
     """
     Evaluates each of the models that can be get from all combinations of parameters values.
@@ -235,6 +254,14 @@ parameters_values = {
     "lo" : ["binary_crossentropy"]
 }
 
+# chosen = {}
+# images, labels = get_dataset_0()
+# backtracking(0,parameters,parameters_values,chosen,images,labels)
+
+# chosen = {}
+# images, labels = get_dataset_1()
+# backtracking(0,parameters,parameters_values,chosen,images,labels)
+
 chosen = {}
-images, labels = get_dataset_1()
+images, labels = get_dataset_2()
 backtracking(0,parameters,parameters_values,chosen,images,labels)
