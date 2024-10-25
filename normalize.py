@@ -125,7 +125,7 @@ def to_greyscale(path:str, filename: str, rgb_to_grey:dict, min_t:float, max_t:f
     new_image = Image.new("L",(234,259))
     new_image.putdata(greyscale_image)
     new_image = new_image.resize((78,86), Image.LANCZOS)
-    new_image.save("./dataset_normalized/"+filename)
+    new_image.save("./dataset_normalized_2/"+filename)
 
 def normalize_all():
     rgb_to_grey = get_mapping()

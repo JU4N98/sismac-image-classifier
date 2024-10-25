@@ -32,9 +32,10 @@ As an alternative it's also possible to make the whole classification process in
 neural network.
 """
 
-INPUT_SHAPE = (78,86,1)
+INPUT_SHAPE_1 = (78,86,1)
+INPUT_SHAPE_2 = (256,1)
 K_FOLD = 5
-EPOCHS = 5
+EPOCHS = 10
 kfold = StratifiedKFold(n_splits=K_FOLD, shuffle=True)
 
 def get_layer_description(nol: int):
@@ -77,7 +78,7 @@ def create_model_1(params:dict):
         sof = ld[i]["sof"]
         pl = ld[i]["pl"]
         if i==0:
-            model.add(layers.Conv2D(nof, (sof,sof), activation=af, input_shape=INPUT_SHAPE))
+            model.add(layers.Conv2D(nof, (sof,sof), activation=af, input_shape=INPUT_SHAPE_1))
         else:
             model.add(layers.Conv2D(nof, (sof,sof), activation=af))
             if pl:
@@ -103,7 +104,68 @@ def create_model_1(params:dict):
 
     return model
 
-def oversampling(images: list, labels: list, target: list):
+def train_model_1(model, images_train, labels_train, images_val, labels_val, f):
+    return model.fit(np.array(images_train[f]),np.array(labels_train[f]),shuffle=True,epochs=EPOCHS,validation_data=(np.array(images_val[f]), np.array(labels_val[f])))
+
+def create_model_2(params:dict):
+    """
+    Creates a tensorflow/keras model for binary classification using the following parameters:
+    :nol: number of layers.
+    :af: activation function.
+    :op: optimizer.
+    :lo: loss function.
+    """
+    nol = params["nol"]
+    nod = params["nod"]
+    af = params["af"]
+    op = params["op"]
+    lo = params["lo"]
+
+    model = keras.Sequential()
+
+    # Adds Conv1D layers
+    ld = get_layer_description(nol)
+    for i in range(nol):
+        nof = ld[i]["nof"]
+        sof = ld[i]["sof"]
+        pl = ld[i]["pl"]
+        if i==0:
+            model.add(layers.Conv1D(nof, sof, activation=af, input_shape=INPUT_SHAPE_2))
+        else:
+            model.add(layers.Conv1D(nof, sof, activation=af))
+            # if pl:
+            #     model.add(layers.MaxPooling1D(pool_size=2))
+    
+    # Adds flattening layer
+    model.add(layers.Flatten())
+    
+    # Adds dense and dropout layers
+    # model.add(layers.Dropout(0.5))
+    for i in range(nod):
+        model.add(layers.Dense(256, activation="relu"))
+        # model.add(layers.Dropout(0.5))
+
+    model.add(layers.Dense(1, activation="sigmoid"))
+
+    # Compiles model
+    model.compile(optimizer=op, 
+              loss=lo, 
+              metrics=['accuracy'])
+    
+    model.summary()
+
+    return model
+
+def get_histograms(images):
+    histograms = []
+    for image in images:
+        histograms.append(np.histogram(image, bins=256, range=(0, 255))[0])
+    return np.array(histograms)
+
+def train_model_2(model, images_train, labels_train, images_val, labels_val, f):
+    return model.fit(get_histograms(images_train[f]),np.array(labels_train[f]),shuffle=True,epochs=EPOCHS,validation_data=(get_histograms(images_val[f]), np.array(labels_val[f])))
+
+def oversampling(images: list, labels: list, target: int):
     """
     Oversamples dataset.
     """
@@ -146,15 +208,15 @@ def save_accuracy(path:str, new_row:list):
         writer = csv.writer(file)
         writer.writerow(new_row)
 
-def train(params: dict, images: list, labels: list, create_model, path:str):
+def train(params: dict, images: list, labels: list, create_model,train_model,path:str):
     """
     Trains and evaluates the model through each fold.
     """
     # Creates folds and balances labels
-    images_train = [[]]*K_FOLD
-    labels_train = [[]]*K_FOLD
-    images_val = [[]]*K_FOLD
-    labels_val = [[]]*K_FOLD
+    images_train = [[] for _ in range(K_FOLD)]
+    labels_train = [[] for _ in range(K_FOLD)]
+    images_val = [[] for _ in range(K_FOLD)]
+    labels_val = [[] for _ in range(K_FOLD)]
     fold = 0
     for train_idx, val_idx in kfold.split(images, labels):
         maximum = 0
@@ -173,10 +235,10 @@ def train(params: dict, images: list, labels: list, create_model, path:str):
     # trains and evaluates the model
     for f in range(K_FOLD):
         model = create_model(params)
-        history = model.fit(np.array(images_train[f]),np.array(labels_train[f]),shuffle=True,epochs=EPOCHS,validation_data=(np.array(images_val[f]), np.array(labels_val[f])))
+        history = train_model(model,images_train,labels_train,images_val,labels_val,f)
         save_accuracy(path,[str(params),history.history["accuracy"],history.history["val_accuracy"]])
 
-def get_dataset_0():
+def get_dataset_0(path:str):
     """
     Returns dataset for the #1 CNNs which classifies images between "sin defectos" (0) and "con defectos" (1).
     """
@@ -187,7 +249,7 @@ def get_dataset_0():
         csv_reader = csv.reader(file)
         header = next(csv_reader)
         for row in csv_reader:
-            image = np.array(Image.open(os.path.join("./dataset_normalized",row[0]+".jpg")))
+            image = np.array(Image.open(os.path.join(path,row[0]+".jpg")))
             if row[1].count("0"):
                 labels.append(0)
                 images.append(image)
@@ -196,7 +258,7 @@ def get_dataset_0():
                 images.append(image)
     return images, labels
 
-def get_dataset_1():
+def get_dataset_1(path:str):
     """
     Returns dataset for the #2 CNNs which classifies images between "sobrecarga en 3 fases" (0) and "sobrecarga en mas de 1 o 2 fases" (1).
     """
@@ -207,7 +269,7 @@ def get_dataset_1():
         csv_reader = csv.reader(file)
         header = next(csv_reader)
         for row in csv_reader:
-            image = np.array(Image.open(os.path.join("./dataset_normalized",row[0]+".jpg")))
+            image = np.array(Image.open(os.path.join(path,row[0]+".jpg")))
             if row[1].count("3"):
                 labels.append(0)
                 images.append(image)
@@ -216,7 +278,7 @@ def get_dataset_1():
                 images.append(image)
     return images, labels
 
-def get_dataset_2():
+def get_dataset_2(path:str):
     """
     Returns dataset for the #3 CNNs which classifies images between "sobrecarga en 1 fase" (0) and "sobrecarga en 2 fases" (1).
     """
@@ -227,7 +289,7 @@ def get_dataset_2():
         csv_reader = csv.reader(file)
         header = next(csv_reader)
         for row in csv_reader:
-            image = np.array(Image.open(os.path.join("./dataset_normalized",row[0]+".jpg")))
+            image = np.array(Image.open(os.path.join(path,row[0]+".jpg")))
             if row[1].count("1"):
                 labels.append(0)
                 images.append(image)
@@ -236,20 +298,21 @@ def get_dataset_2():
                 images.append(image)
     return images, labels
 
-def backtracking(idx: int, parameters: list, values: dict, chosen: dict, images: list, labels: list, create_model, path:str):
+def backtracking(idx: int, parameters: list, values: dict, chosen: dict, images: list, labels: list, create_model, train_model, path:str):
     """
     Evaluates each of the models that can be get from all combinations of parameters values.
     """
     if idx == len(parameters):
-        train(chosen,images,labels,create_model,path)
+        train(chosen,images,labels,create_model,train_model,path)
         return
     
     for val in values[parameters[idx]]:
         chosen[parameters[idx]] = val
-        backtracking(idx+1,parameters,values,chosen,images,labels,create_model,path)
+        backtracking(idx+1,parameters,values,chosen,images,labels,create_model,train_model,path)
     
     return
 
+# Model 1
 parameters = ["nol", "nod", "af", "op", "lo"]
 parameters_values = {
     "nol" : [3,4,5,6,7,8,9,10],
@@ -259,15 +322,36 @@ parameters_values = {
     "lo" : ["binary_crossentropy"]
 }
 
-# Model 1
-# chosen = {}
-# images, labels = get_dataset_0()
-# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,"./models/model_1/results_0.csv")
+chosen = {}
+images, labels = get_dataset_0("./dataset_normalized_1")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,"./models/model_1/results_0.csv")
+
+chosen = {}
+images, labels = get_dataset_1("./dataset_normalized_1")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,"./models/model_1/results_1.csv")
+
+chosen = {}
+images, labels = get_dataset_2("./dataset_normalized_1")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,"./models/model_1/results_2.csv")
+
+# Model 2
+# parameters = ["nol", "nod", "af", "op", "lo"]
+# parameters_values = {
+#     "nol" : [2,3,4,5,6,7,8,9,10],
+#     "nod" : [2,3,4],
+#     "af" : ["relu"],
+#     "op" : ["sgd","adam","rmsprop"],
+#     "lo" : ["binary_crossentropy"]
+# }
+
+chosen = {}
+images, labels = get_dataset_0("./dataset_normalized_2")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,"./models/model_2/results_0.csv")
 
 # chosen = {}
-# images, labels = get_dataset_1()
-# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,"./models/model_1/results_1.csv")
+# images, labels = get_dataset_1("./dataset_normalized_2")
+# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,"./models/model_2/results_1.csv")
 
 # chosen = {}
-# images, labels = get_dataset_2()
-# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,"./models/model_1/results_2.csv")
+# images, labels = get_dataset_2("./dataset_normalized_2")
+# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,"./models/model_2/results_2.csv")
