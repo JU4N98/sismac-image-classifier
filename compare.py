@@ -25,10 +25,11 @@ def get_best_model(path: str):
     print(f"\tbest model by avg accuracy = {best_model_1} avg_accuracy = {maximum_avg}") 
     print(f"\tbest model by val accuracy = {best_model_2} val_accuracy = {maximum_val}") 
 
-# get_best_model("./models/model_1/results_0.csv")
-# get_best_model("./models/model_1/results_1.csv")
-# get_best_model("./models/model_1/results_2.csv")
-
+print("Model 1:")
+get_best_model("./models/model_1/results_0.csv")
+get_best_model("./models/model_1/results_1.csv")
+get_best_model("./models/model_1/results_2.csv")
+print("Model 2:")
 get_best_model("./models/model_2/results_0.csv")
 get_best_model("./models/model_2/results_1.csv")
 get_best_model("./models/model_2/results_2.csv")
