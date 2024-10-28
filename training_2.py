@@ -239,7 +239,7 @@ parameters_values = {
 
 chosen = {}
 images, labels = get_dataset_3("./dataset_normalized_2")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_3,train_model_3,"./models/model_4/results_1.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_4,train_model_3,"./models/model_4/results_1.csv")
 
 # Model 5: VGG fine-tunning
 
@@ -253,4 +253,4 @@ parameters_values = {
 
 chosen = {}
 images, labels = get_dataset_3("./dataset_normalized_2")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_3,train_model_3,"./models/model_5/results_1.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_5,train_model_3,"./models/model_5/results_1.csv")
