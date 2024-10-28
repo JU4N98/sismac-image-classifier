@@ -315,43 +315,35 @@ def backtracking(idx: int, parameters: list, values: dict, chosen: dict, images:
 # Model 1
 parameters = ["nol", "nod", "af", "op", "lo"]
 parameters_values = {
-    "nol" : [7,8,9,10],
+    "nol" : [3,4,5,6,7,8,9,10],
     "nod" : [2,3,4],
     "af" : ["relu"],
     "op" : ["sgd","adam","rmsprop"],
     "lo" : ["binary_crossentropy"]
 }
 
-# chosen = {}
-# images, labels = get_dataset_0("./dataset_normalized_1")
-# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,"./models/model_1/results_0.csv")
+chosen = {}
+images, labels = get_dataset_0("./dataset_normalized_1")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,"./models/model_1/results_0.csv")
 
-# chosen = {}
-# images, labels = get_dataset_1("./dataset_normalized_1")
-# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,"./models/model_1/results_1.csv")
+chosen = {}
+images, labels = get_dataset_1("./dataset_normalized_1")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,"./models/model_1/results_1.csv")
 
 chosen = {}
 images, labels = get_dataset_2("./dataset_normalized_1")
 backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,"./models/model_1/results_2.csv")
 
 # Model 2
-# parameters = ["nol", "nod", "af", "op", "lo"]
-parameters_values_2 = {
-    "nol" : [2,3,4,5,6,7,8,9,10],
-    "nod" : [2,3,4],
-    "af" : ["relu"],
-    "op" : ["sgd","adam","rmsprop"],
-    "lo" : ["binary_crossentropy"]
-}
 
 chosen = {}
 images, labels = get_dataset_0("./dataset_normalized_2")
-backtracking(0,parameters,parameters_values_2,chosen,images,labels,create_model_2,train_model_2,"./models/model_2/results_0.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,"./models/model_2/results_0.csv")
 
-# chosen = {}
-# images, labels = get_dataset_1("./dataset_normalized_2")
-# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,"./models/model_2/results_1.csv")
+chosen = {}
+images, labels = get_dataset_1("./dataset_normalized_2")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,"./models/model_2/results_1.csv")
 
-# chosen = {}
-# images, labels = get_dataset_2("./dataset_normalized_2")
-# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,"./models/model_2/results_2.csv")
+chosen = {}
+images, labels = get_dataset_2("./dataset_normalized_2")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,"./models/model_2/results_2.csv")
