@@ -243,14 +243,14 @@ backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_4,
 
 # Model 5: VGG fine-tunning
 
-parameters = ["op", "lo","nn","dim"]
-parameters_values = {
-    "op" : ["sgd","adam","rmsprop"],
-    "lo" : ["sparse_categorical_crossentropy"],
-    "nn" : [256,512,1024],
-    "dim": [(224,224)]
-}
+# parameters = ["op", "lo","nn","dim"]
+# parameters_values = {
+#     "op" : ["sgd","adam","rmsprop"],
+#     "lo" : ["sparse_categorical_crossentropy"],
+#     "nn" : [256,512,1024],
+#     "dim": [(224,224)]
+# }
 
-chosen = {}
-images, labels = get_dataset_3("./dataset_normalized_2")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_5,train_model_3,"./models/model_5/results_1.csv")
+# chosen = {}
+# images, labels = get_dataset_3("./dataset_normalized_2")
+# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_5,train_model_3,"./models/model_5/results_1.csv")

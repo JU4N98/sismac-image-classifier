@@ -4,11 +4,11 @@
 1. Install python for [Windows](https://www.python.org/downloads/windows/)
 2. Inside the project, create a virtual environment:
 ```
-python -m venv venv
+python -m venv .\venv
 ```
 3. Activate the virtual environment:
 ```
-venv\Scripts\activate
+.\venv\Scripts\activate
 ```
 4. Install all dependencies:
 ```
