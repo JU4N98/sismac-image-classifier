@@ -1,35 +1,63 @@
 import ast
 import csv
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
-def get_best_model(path: str):
-    best_model_1 = ""
-    maximum_avg = 0
+def create_df(params: dict):
+    columns = ["model", "val_acc", "tr_acc"]
+    for key in params.keys():
+        columns.append(key)
+    return pd.DataFrame(columns=columns)
 
-    best_model_2 = ""
-    maximum_val = 0
+def create_graphs(path: str):
+    
+    df = pd.DataFrame()
     with open(path, mode='r') as file:
         csv_reader = csv.reader(file)
+        
+        keys = []
         for row in csv_reader:
-            key = row[0]
-            test_accuracy = ast.literal_eval(row[1])
+            params = ast.literal_eval(row[0])
+            keys = list(params.keys()) 
+            training_accuracy = ast.literal_eval(row[1])
             val_accuracy = ast.literal_eval(row[2])
-            for i in range(len(test_accuracy)):
-                if test_accuracy[i]*0.8 + val_accuracy[i]*0.2 > maximum_avg:
-                    maximum_avg = test_accuracy[i]*0.8 + val_accuracy[i]*0.2
-                    best_model_1 = key
-                if val_accuracy[i] > maximum_val:
-                    maximum_val = val_accuracy[i]
-                    best_model_2 = key
-    
-    print(f"Results for {path}")
-    print(f"\tbest model by avg accuracy = {best_model_1} avg_accuracy = {maximum_avg}") 
-    print(f"\tbest model by val accuracy = {best_model_2} val_accuracy = {maximum_val}") 
+            
+            idx = val_accuracy.index(max(val_accuracy))
+            val_acc = val_accuracy[idx]
+            tr_acc = training_accuracy[idx]
 
-print("Model 1:")
-get_best_model("./models/model_1/results_0.csv")
-get_best_model("./models/model_1/results_1.csv")
-get_best_model("./models/model_1/results_2.csv")
-print("Model 2:")
-get_best_model("./models/model_2/results_0.csv")
-get_best_model("./models/model_2/results_1.csv")
-get_best_model("./models/model_2/results_2.csv")
+            if df.empty:
+                df = create_df(params)
+            
+            params["val_acc"] = val_acc
+            params["tr_acc"] = tr_acc
+            df = pd.concat([df, pd.Series(params).to_frame().T],ignore_index=True)
+    
+    df = df.groupby(keys,as_index=False).agg({"val_acc":"mean","tr_acc":"mean"})
+
+    fig, axs = plt.subplots((len(keys)+2)//3,3)
+    for idx, column in enumerate(keys):
+        labels = np.unique(df[column])
+        colors = plt.cm.viridis(np.linspace(0,1,len(labels)))
+        map_color = {label: colors[i] for i,label in enumerate(labels)}
+
+        # cmap = plt.get_cmap("Set1")  
+        # labels = np.unique(df[column])
+        # colors = [cmap(i / len(labels)) for i in range(len(labels))]
+        # map_color = {label: colors[i] for i, label in enumerate(labels)}
+
+        for label in labels:
+            axs[idx//3, idx%3].scatter(df[df[column]==label]["tr_acc"],df[df[column]==label]["val_acc"],color=map_color[label],label=label)
+            axs[idx//3, idx%3].set_title(f"Accuracy by {column}")
+            axs[idx//3, idx%3].set_xlabel("Training accuracy")
+            axs[idx//3, idx%3].set_ylabel("Validation accuracy")
+            axs[idx//3, idx%3].set_xlim([0,1])
+            axs[idx//3, idx%3].set_ylim([0,1])
+        # plt.grid()
+        # plt.show()
+        # plt.clf()
+    plt.tight_layout()
+    plt.show()
+
+create_graphs("./models/model_1/results_0.csv")
