@@ -1,3 +1,4 @@
+import os
 import ast
 import csv
 import numpy as np
@@ -10,10 +11,11 @@ def create_df(params: dict):
         columns.append(key)
     return pd.DataFrame(columns=columns)
 
-def create_graphs(path: str):
-    
+def create_graph(path: str, name: str):
     df = pd.DataFrame()
-    with open(path, mode='r') as file:
+
+    print(path,name)
+    with open(os.path.join(path,name), mode='r') as file:
         csv_reader = csv.reader(file)
         
         keys = []
@@ -36,7 +38,7 @@ def create_graphs(path: str):
     
     df = df.groupby(keys,as_index=False).agg({"val_acc":"mean","tr_acc":"mean"})
 
-    fig, axs = plt.subplots((len(keys)+2)//3,3)
+    fig, axs = plt.subplots((len(keys)+2)//3,3,figsize=(20,10))
     for idx, column in enumerate(keys):
         labels = np.unique(df[column])
         colors = plt.cm.viridis(np.linspace(0,1,len(labels)))
@@ -54,10 +56,18 @@ def create_graphs(path: str):
             axs[idx//3, idx%3].set_ylabel("Validation accuracy")
             axs[idx//3, idx%3].set_xlim([0,1])
             axs[idx//3, idx%3].set_ylim([0,1])
-        # plt.grid()
-        # plt.show()
-        # plt.clf()
+            axs[idx//3, idx%3].legend()
     plt.tight_layout()
-    plt.show()
+    plt.legend()
+    print(os.path.join(path,name.strip(".")[0]+".png"))
+    plt.savefig(os.path.join(path,name.split(".")[0]+".png"))
+    plt.clf()
 
-create_graphs("./models/model_1/results_0.csv")
+def create_graphs(path: str):
+    for filename in os.listdir(path):
+        create_graph(path, filename)
+
+create_graphs("./models/model_1")
+create_graphs("./models/model_2")
+create_graphs("./models/model_3")
+create_graphs("./models/model_4")
