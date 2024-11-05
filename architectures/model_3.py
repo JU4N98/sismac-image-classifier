@@ -3,7 +3,17 @@ sys.path.append('../')
 from pycore.tikzeng import *
 
 arch = [
-    
+    to_head( '..' ),
+    to_cor(),
+    to_begin(),
+    to_Conv("resnet", 7, 16, offset="(0,0,0)", to="(0,0,0)", caption="ResNet", height=64, depth=64, width=32 ),
+    to_Conv("flatten", 1, 1, offset="(3,0,0)", to="(resnet-east)", caption="flatten", height=2, depth=64, width=2 ),
+    to_connection("resnet","flatten"),
+    to_Conv("dense", 1, 1, offset="(3,0,0)", to="(flatten-east)", caption="dense", height=2, depth=32, width=2 ),
+    to_connection("flatten", "dense"),
+    to_SoftMax("softmax", 1 ,"(3,0,0)", "(dense-east)", caption="SOFTMAX", height=2, depth=16, width=2),
+    to_connection("dense", "softmax"),
+    to_end()
 ]
 
 def main():
