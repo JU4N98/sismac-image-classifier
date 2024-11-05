@@ -2,10 +2,12 @@ import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 import tensorflow as tf, keras
 from tensorflow.keras import layers, models
+from tensorflow.keras.callbacks import ModelCheckpoint
 import csv
 from PIL import Image
 import numpy as np
-from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.model_selection import StratifiedKFold, train_test_split
 from random import randint
 import matplotlib.pyplot as plt
 
@@ -35,7 +37,8 @@ neural network.
 INPUT_SHAPE_1 = (78,86,1)
 INPUT_SHAPE_2 = (256,1)
 K_FOLD = 5
-EPOCHS = 10
+EPOCHS = 15
+RANDOM_STATE = 13
 kfold = StratifiedKFold(n_splits=K_FOLD, shuffle=True)
 
 def get_layer_description(nol: int):
@@ -104,8 +107,36 @@ def create_model_1(params:dict):
 
     return model
 
+def normalize(images):
+    normalized = []
+    for image in images:
+        normalized.append(image/256)
+    return normalized
+
 def train_model_1(model, images_train, labels_train, images_val, labels_val, f):
-    return model.fit(np.array(images_train[f]),np.array(labels_train[f]),shuffle=True,epochs=EPOCHS,validation_data=(np.array(images_val[f]), np.array(labels_val[f])))
+    checkpoint_callback = ModelCheckpoint(
+        'best_model.keras',
+        monitor='val_accuracy',
+        mode='max',
+        save_best_only=True,
+    )
+    return model.fit(
+        np.array(normalize(images_train[f])),
+        np.array(labels_train[f]),
+        shuffle=True,
+        epochs=EPOCHS,
+        validation_data=(np.array(normalize(images_val[f])), np.array(labels_val[f])),
+        callbacks = [checkpoint_callback]
+    )
+
+def test_model_1(images, labels):
+    best_model = models.load_model('best_model.keras')
+    predictions = best_model.predict(np.array(normalize(images)))
+    predictions =  (predictions >= 0.5).astype(int)
+    # class_report = classification_report(labels,predictions)
+    # confu_matrix = confusion_matrix(labels,predictions)
+    test_loss, test_accuracy = best_model.evaluate(np.array(normalize(images)), np.array(labels))
+    return [test_accuracy, test_loss] # class_report, confu_matrix]
 
 def create_model_2(params:dict):
     """
@@ -159,11 +190,33 @@ def create_model_2(params:dict):
 def get_histograms(images):
     histograms = []
     for image in images:
-        histograms.append(np.histogram(image, bins=256, range=(0, 255))[0])
+        histograms.append(np.histogram(image, bins=256, range=(0, 255), density=True)[0])
     return np.array(histograms)
 
 def train_model_2(model, images_train, labels_train, images_val, labels_val, f):
-    return model.fit(get_histograms(images_train[f]),np.array(labels_train[f]),shuffle=True,epochs=EPOCHS,validation_data=(get_histograms(images_val[f]), np.array(labels_val[f])))
+    checkpoint_callback = ModelCheckpoint(
+        'best_model.keras',
+        monitor='val_accuracy',
+        mode='max',
+        save_best_only=True,
+    )
+    return model.fit(
+        get_histograms(images_train[f]),
+        np.array(labels_train[f]),
+        shuffle=True,
+        epochs=EPOCHS,
+        validation_data=(get_histograms(images_val[f]), np.array(labels_val[f])),
+        callbacks = [checkpoint_callback]
+    )
+
+def test_model_2(images, labels):
+    best_model = models.load_model('best_model.keras')
+    predictions = best_model.predict(get_histograms(images))
+    predictions =  (predictions >= 0.5).astype(int)
+    # class_report = classification_report(labels,predictions)
+    # confu_matrix = confusion_matrix(labels,predictions)
+    test_loss, test_accuracy = best_model.evaluate(get_histograms(images), np.array(labels))
+    return [test_accuracy, test_loss] # class_report, confu_matrix]
 
 def oversampling(images: list, labels: list, target: int):
     """
@@ -199,7 +252,7 @@ def save_history(history, name: str):
     ax.set_ylim([0, 1])
     plt.clf()
 
-def save_accuracy(path:str, new_row:list):
+def save_row(path:str, new_row:list):
     """
     Appends a row in a csv with the model description, accuracy and validation accuracy.
     """
@@ -208,11 +261,15 @@ def save_accuracy(path:str, new_row:list):
         writer = csv.writer(file)
         writer.writerow(new_row)
 
-def train(params: dict, images: list, labels: list, create_model,train_model,path:str):
+def train(params: dict, images: list, labels: list, create_model,train_model,test_model,path:str):
     """
     Trains and evaluates the model through each fold.
     """
     # Creates folds and balances labels
+    images_test = []
+    labels_test = []
+    images, images_test, labels, labels_test = train_test_split(images,labels,test_size=0.2,random_state=RANDOM_STATE,stratify=labels)
+
     images_train = [[] for _ in range(K_FOLD)]
     labels_train = [[] for _ in range(K_FOLD)]
     images_val = [[] for _ in range(K_FOLD)]
@@ -236,7 +293,9 @@ def train(params: dict, images: list, labels: list, create_model,train_model,pat
     for f in range(K_FOLD):
         model = create_model(params)
         history = train_model(model,images_train,labels_train,images_val,labels_val,f)
-        save_accuracy(path,[str(params),history.history["accuracy"],history.history["val_accuracy"]])
+        row = [str(params),history.history["accuracy"],history.history["val_accuracy"],history.history["loss"],history.history["val_loss"]]
+        row.extend(test_model(images_test, labels_test))
+        save_row(path,row)
 
 def get_dataset_0(path:str):
     """
@@ -298,17 +357,17 @@ def get_dataset_2(path:str):
                 images.append(image)
     return images, labels
 
-def backtracking(idx: int, parameters: list, values: dict, chosen: dict, images: list, labels: list, create_model, train_model, path:str):
+def backtracking(idx: int, parameters: list, values: dict, chosen: dict, images: list, labels: list, create_model, train_model, test_model, path:str):
     """
     Evaluates each of the models that can be get from all combinations of parameters values.
     """
     if idx == len(parameters):
-        train(chosen,images,labels,create_model,train_model,path)
+        train(chosen,images,labels,create_model,train_model,test_model,path)
         return
     
     for val in values[parameters[idx]]:
         chosen[parameters[idx]] = val
-        backtracking(idx+1,parameters,values,chosen,images,labels,create_model,train_model,path)
+        backtracking(idx+1,parameters,values,chosen,images,labels,create_model,train_model,test_model,path)
     
     return
 
@@ -316,35 +375,35 @@ def backtracking(idx: int, parameters: list, values: dict, chosen: dict, images:
 
 parameters = ["nol", "nod", "af", "op", "lo"]
 parameters_values = {
-    "nol" : [3,4,5,6,7,8,9,10],
-    "nod" : [2,3,4],
-    "af" : ["relu"],
-    "op" : ["sgd","adam","rmsprop"],
-    "lo" : ["binary_crossentropy"]
+    "nol" : [3,4,5,6,7,8,9,10], # number of layers
+    "nod" : [2,3,4], # number of dense layers
+    "af" : ["relu"], # activation function
+    "op" : ["sgd","adam","rmsprop"], # optimizer
+    "lo" : ["binary_crossentropy"] # loss function
 }
 
 chosen = {}
 images, labels = get_dataset_0("./dataset_normalized_1")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,"./models/model_1/results_0.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,test_model_1,"./models/model_1/results_00.csv")
 
 chosen = {}
 images, labels = get_dataset_1("./dataset_normalized_1")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,"./models/model_1/results_1.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,"./models/model_1/results_11.csv")
 
 chosen = {}
 images, labels = get_dataset_2("./dataset_normalized_1")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,"./models/model_1/results_2.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,"./models/model_1/results_22.csv")
 
 # Model 2: convolutional 1D neural netwrok with binary classification
 
 chosen = {}
 images, labels = get_dataset_0("./dataset_normalized_2")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,"./models/model_2/results_0.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,test_model_2,"./models/model_2/results_00.csv")
 
 chosen = {}
 images, labels = get_dataset_1("./dataset_normalized_2")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,"./models/model_2/results_1.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,"./models/model_2/results_11.csv")
 
 chosen = {}
 images, labels = get_dataset_2("./dataset_normalized_2")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,"./models/model_2/results_2.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,"./models/model_2/results_22.csv")
