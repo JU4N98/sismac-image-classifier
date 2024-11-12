@@ -19,6 +19,13 @@ export const ReportDetail = () => {
             marginLeft:"10%",
             textAlign:"center"
         }}>
+            <h2 style={{
+                marginTop:"40px",
+                marginBottom:"40px",
+            }}>Reporte: {report.name}</h2>
+            <p>
+                Descripcion: {report.description}
+            </p>
             <div style={galleryStyle}>
                 {report.images?.map((image, index) => (
                     <div key={index} style={imageContainerStyle}>

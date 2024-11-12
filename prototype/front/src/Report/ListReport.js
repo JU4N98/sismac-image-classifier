@@ -8,18 +8,18 @@ const ReportList = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        getReports(page).
-        then((response)=>{
+        getReports(page)
+        .then((response)=>{
             setReports(response.data);
-        }).
-        catch((error)=>{
+        })
+        .catch((error)=>{
             console.log(error);
         })
     },[]);
 
     const handleView = (reportId) => {
-        navigate(`/listReport/${reportId}`);
-      };
+      navigate(`/listReport/${reportId}`);
+    };
 
     return (
         <div style={{

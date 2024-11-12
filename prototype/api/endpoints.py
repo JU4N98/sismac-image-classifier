@@ -11,7 +11,7 @@ def init_routes(app):
         predict(report.images)
         db.session.add(report)
         db.session.commit()
-        return {}, 200
+        return jsonify(ReportSchema().dump(report)), 200
 
     @app.route("/report", methods=["GET"])
     def list_reports():
