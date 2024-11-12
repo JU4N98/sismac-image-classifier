@@ -1,6 +1,5 @@
 from marshmallow import Schema, fields, post_load
 from models import Image, Report
-import base64
 
 class ImageSchema(Schema):
     file = fields.Str(required=True)

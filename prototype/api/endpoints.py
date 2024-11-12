@@ -2,11 +2,14 @@ from schemas import ReportSchema
 from models import Report
 from flask import request, jsonify
 from db import db
+from predict import predict
 
 def init_routes(app):
     @app.route("/report", methods=["POST"])
     def create_report():
-        db.session.add(ReportSchema().load(request.json))
+        report = ReportSchema().load(request.json)
+        predict(report.images)
+        db.session.add(report)
         db.session.commit()
         return {}, 200
 
