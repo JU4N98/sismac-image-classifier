@@ -388,11 +388,11 @@ backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,
 
 chosen = {}
 images, labels = get_dataset_1("./dataset_normalized_1")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,"./models/model_1/results_11.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,test_model_1,"./models/model_1/results_11.csv")
 
 chosen = {}
 images, labels = get_dataset_2("./dataset_normalized_1")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,"./models/model_1/results_22.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,test_model_1,"./models/model_1/results_22.csv")
 
 # Model 2: convolutional 1D neural netwrok with binary classification
 
@@ -402,8 +402,8 @@ backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,
 
 chosen = {}
 images, labels = get_dataset_1("./dataset_normalized_2")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,"./models/model_2/results_11.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,test_model_2,"./models/model_2/results_11.csv")
 
 chosen = {}
 images, labels = get_dataset_2("./dataset_normalized_2")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,"./models/model_2/results_22.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,test_model_2,"./models/model_2/results_22.csv")

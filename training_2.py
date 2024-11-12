@@ -34,7 +34,7 @@ neural network.
 """
 
 K_FOLD = 5
-EPOCHS = 1
+EPOCHS = 15
 RANDOM_STATE = 13
 kfold = StratifiedKFold(n_splits=K_FOLD, shuffle=True)
 
