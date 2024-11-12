@@ -7,15 +7,10 @@ export const ReportDetail = () => {
     const [report, setReport] = useState({});
 
     useEffect(() => {
-        getReport(reportId).
-        then((response)=>{
-            setReport(response.data);
-            console.log(response.data);
-        }).
-        catch((error)=>{
-            // console.log("XD");
-            console.log(error);
-        })
+        getReport(reportId)
+        .then((response)=>{setReport(response.data)})
+        .catch((error)=>{console.log(error)})
+        
     },[]);
 
     return (
@@ -28,10 +23,10 @@ export const ReportDetail = () => {
                 {report.images?.map((image, index) => (
                     <div key={index} style={imageContainerStyle}>
                         <img
-                        key={index}
-                        src={image.file}
-                        alt={`Gallery image ${index + 1}`}
-                        style={imageStyle}
+                            key={index}
+                            src={image.file}
+                            alt={image.name}
+                            style={imageStyle}
                         />
                         <div style={labelStyle}>
                             <strong>Nombre:</strong> {image.name}

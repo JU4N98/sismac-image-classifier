@@ -1,4 +1,4 @@
-import React, { useState, resolve} from "react";
+import React, { useState } from "react";
 import {postReport} from "../ApiManager/ApiManager"
 
 const ReportForm = () => {

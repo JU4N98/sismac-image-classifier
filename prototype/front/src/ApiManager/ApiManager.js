@@ -8,8 +8,6 @@ export const postReport = async (name, description, images) => {
         description,
         images
     }
-    console.log(payload);
-    console.log(payload.images);
     return await axios.post(
             url,
             payload,
@@ -37,6 +35,5 @@ export const getReport = async (reportId) => {
     const response = await axios.get(
         url
     );
-    // console.log(response);
     return response;
 }
