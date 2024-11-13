@@ -1,4 +1,5 @@
-const BASE_URL = "http://localhost:8080";
+const {REACT_APP_BACKEND_URL} = process.env;
+const BASE_URL = REACT_APP_BACKEND_URL;
 
 const ENDPOINTS = {
     POST_REPORT : () => BASE_URL + "/report",
