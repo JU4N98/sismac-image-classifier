@@ -35,7 +35,6 @@ neural network.
 
 K_FOLD = 5
 EPOCHS = 15
-RANDOM_STATE = 13
 kfold = StratifiedKFold(n_splits=K_FOLD, shuffle=True)
 
 def oversampling(images: list, labels: list, target: int):
@@ -104,7 +103,7 @@ def train(params: dict, images: list, labels: list, create_model,train_model,tes
     """
     images_test = []
     labels_test = []
-    images, images_test, labels, labels_test = train_test_split(images,labels,test_size=0.2,random_state=RANDOM_STATE,stratify=labels)
+    images, images_test, labels, labels_test = train_test_split(images,labels,test_size=0.2,stratify=labels)
 
     # Creates folds and balances labels
     images_train = [[] for _ in range(K_FOLD)]
@@ -255,9 +254,13 @@ parameters_values = {
     "dim": [(224,224)] # dimensions of the input model
 }
 
+# chosen = {}
+# images, labels = get_dataset_3("./dataset_normalized_2")
+# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_3,train_model_3,test_model_3,"./models/model_3/results_00.csv")
+
 chosen = {}
 images, labels = get_dataset_3("./dataset_normalized_2")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_3,train_model_3,test_model_3,"./models/model_3/results_00.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_3,train_model_3,test_model_3,"./models/model_3/results_000.csv")
 
 # Model 4: Inception fine-tunning
 
@@ -270,9 +273,13 @@ parameters_values = {
     "dim": [(299,299)] # dimensions of the input model
 }
 
+# chosen = {}
+# images, labels = get_dataset_3("./dataset_normalized_2")
+# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_4,train_model_3,test_model_3,"./models/model_4/results_00.csv")
+
 chosen = {}
 images, labels = get_dataset_3("./dataset_normalized_2")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_4,train_model_3,test_model_3,"./models/model_4/results_00.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_4,train_model_3,test_model_3,"./models/model_4/results_000.csv")
 
 # Model 5: VGG fine-tunning
 

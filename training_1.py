@@ -38,7 +38,7 @@ INPUT_SHAPE_1 = (78,86,1)
 INPUT_SHAPE_2 = (256,1)
 K_FOLD = 5
 EPOCHS = 15
-RANDOM_STATE = 13
+# RANDOM_STATE = 13
 kfold = StratifiedKFold(n_splits=K_FOLD, shuffle=True)
 
 def get_layer_description(nol: int):
@@ -268,7 +268,7 @@ def train(params: dict, images: list, labels: list, create_model,train_model,tes
     # Creates folds and balances labels
     images_test = []
     labels_test = []
-    images, images_test, labels, labels_test = train_test_split(images,labels,test_size=0.2,random_state=RANDOM_STATE,stratify=labels)
+    images, images_test, labels, labels_test = train_test_split(images,labels,test_size=0.2,stratify=labels)
 
     images_train = [[] for _ in range(K_FOLD)]
     labels_train = [[] for _ in range(K_FOLD)]
@@ -382,28 +382,52 @@ parameters_values = {
     "lo" : ["binary_crossentropy"] # loss function
 }
 
+# chosen = {}
+# images, labels = get_dataset_0("./dataset_normalized_1")
+# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,test_model_1,"./models/model_1/results_00.csv")
+
+# chosen = {}
+# images, labels = get_dataset_1("./dataset_normalized_1")
+# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,test_model_1,"./models/model_1/results_11.csv")
+
+# chosen = {}
+# images, labels = get_dataset_2("./dataset_normalized_1")
+# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,test_model_1,"./models/model_1/results_22.csv")
+
 chosen = {}
 images, labels = get_dataset_0("./dataset_normalized_1")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,test_model_1,"./models/model_1/results_00.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,test_model_1,"./models/model_1/results_000.csv")
 
 chosen = {}
 images, labels = get_dataset_1("./dataset_normalized_1")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,test_model_1,"./models/model_1/results_11.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,test_model_1,"./models/model_1/results_111.csv")
 
 chosen = {}
 images, labels = get_dataset_2("./dataset_normalized_1")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,test_model_1,"./models/model_1/results_22.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_1,train_model_1,test_model_1,"./models/model_1/results_222.csv")
 
 # Model 2: convolutional 1D neural netwrok with binary classification
 
+# chosen = {}
+# images, labels = get_dataset_0("./dataset_normalized_2")
+# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,test_model_2,"./models/model_2/results_00.csv")
+
+# chosen = {}
+# images, labels = get_dataset_1("./dataset_normalized_2")
+# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,test_model_2,"./models/model_2/results_11.csv")
+
+# chosen = {}
+# images, labels = get_dataset_2("./dataset_normalized_2")
+# backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,test_model_2,"./models/model_2/results_22.csv")
+
 chosen = {}
 images, labels = get_dataset_0("./dataset_normalized_2")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,test_model_2,"./models/model_2/results_00.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,test_model_2,"./models/model_2/results_000.csv")
 
 chosen = {}
 images, labels = get_dataset_1("./dataset_normalized_2")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,test_model_2,"./models/model_2/results_11.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,test_model_2,"./models/model_2/results_111.csv")
 
 chosen = {}
 images, labels = get_dataset_2("./dataset_normalized_2")
-backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,test_model_2,"./models/model_2/results_22.csv")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_2,train_model_2,test_model_2,"./models/model_2/results_222.csv")
