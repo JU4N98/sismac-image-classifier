@@ -63,7 +63,7 @@ def get_mapping() -> dict:
                     if(get_distance(t_scale[i],(r,g,b)) < distance):
                         idx = i
                         distance = get_distance(t_scale[i],(r,g,b))
-                rgb_to_grey[get_rgb_mask((r,g,b))] = grey_scale[idx];
+                rgb_to_grey[get_rgb_mask((r,g,b))] = grey_scale[idx]
 
     with open("rgb_to_grey.json", "w") as json_file:
         json.dump(rgb_to_grey, json_file)
