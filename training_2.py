@@ -245,7 +245,7 @@ def backtracking(idx: int, parameters: list, values: dict, chosen: dict, images:
 
 # Model 3: Resnet fine-tunning 
 
- parameters = ["op", "lo","nod","nn","dim"]
+parameters = ["op", "lo","nod","nn","dim"]
 parameters_values = {
     "op" : ["sgd","adam","rmsprop"], # optimizer
     "lo" : ["sparse_categorical_crossentropy"], # loss function
@@ -258,9 +258,9 @@ parameters_values = {
 # images, labels = get_dataset_3("./dataset_normalized_2")
 # backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_3,train_model_3,test_model_3,"./models/model_3/results_00.csv")
 
-#chosen = {}
-#images, labels = get_dataset_3("./dataset_normalized_2")
-#backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_3,train_model_3,test_model_3,"./models/model_3/results_000.csv")
+chosen = {}
+images, labels = get_dataset_3("./dataset_normalized_2")
+backtracking(0,parameters,parameters_values,chosen,images,labels,create_model_3,train_model_3,test_model_3,"./models/model_3/results_000.csv")
 
 # Model 4: Inception fine-tunning
 
