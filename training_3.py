@@ -313,32 +313,25 @@ def show_graph(accuracy, val_accuracy, loss, val_loss):
     plt.show()
 
 def manual_training(params, model, stage):
-    lo =  0
-    hi = 0
     epochs = 15
     initial_lrs = {"adam":0.001,"sgd":0.01,"rmsprop":0.01}
-    hi = initial_lrs[params["op"]]
+    lr = initial_lrs[params["op"]]
 
     while True:
-        med = (lo+hi)/2.
-        history = train(med,epochs,model,stage,params)
+        history = train(lr,epochs,model,stage,params)
         show_graph(history.history["accuracy"],history.history["val_accuracy"],history.history["loss"],history.history["val_loss"])
         
-        lr = str(input("Increase (I), Decrease (D) or Equal (E): "))
-        epoch_delta = int(input("How many epochs to add: "))
-
-        if lr == "I":
-            lo = (hi+lo)/2
-        elif lr == "D":
-            hi = (hi+lo)/2
+        print(f"Current learning rate = {lr}, Current # of epochs = {epochs}")
+        lr_delta = float(input("Learining rate delta: "))
+        epoch_delta = int(input("Epochs delta: "))
         
         epochs += epoch_delta
-
+        lr += lr_delta
 
 # MODEL 1
 # First classification
 parameters = {"nol":4, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
-manual_training(parameters,1,1)
+# manual_training(parameters,1,1)
 parameters = {"nol":4, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 parameters = {"nol":5, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # Second classification
@@ -354,6 +347,7 @@ parameters = {"nol":3, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentr
 # First classification
 parameters = {"nol":6, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 parameters = {"nol":6, "nod":3, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
+manual_training(parameters,2,2)
 parameters = {"nol":7, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # Second classification
 parameters = {"nol":3, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
