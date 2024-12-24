@@ -14,7 +14,6 @@ def create_df(params: dict):
 def create_graph(path: str, name: str):
     df = pd.DataFrame()
 
-    print(path,name)
     with open(os.path.join(path,name), mode='r') as file:
         csv_reader = csv.reader(file)
         
@@ -67,7 +66,49 @@ def create_graphs(path: str):
     for filename in os.listdir(path):
         create_graph(path, filename)
 
-create_graphs("./models/model_1")
-create_graphs("./models/model_2")
-create_graphs("./models/model_3")
-create_graphs("./models/model_4")
+# create_graphs("./models/model_1")
+# create_graphs("./models/model_2")
+# create_graphs("./models/model_3")
+# create_graphs("./models/model_4")
+
+def get_candidates(path: str):
+    df = pd.DataFrame()
+
+    with open(path, mode='r') as file:
+        csv_reader = csv.reader(file)
+        
+        keys = []
+        for row in csv_reader:
+            params = ast.literal_eval(row[0])
+            keys = list(params.keys()) 
+            training_accuracy = ast.literal_eval(row[1])
+            val_accuracy = ast.literal_eval(row[2])
+            
+            idx = val_accuracy.index(max(val_accuracy))
+            val_acc = val_accuracy[idx]
+            tr_acc = training_accuracy[idx]
+
+            if df.empty:
+                df = create_df(params)
+            
+            params["val_acc"] = val_acc
+            params["tr_acc"] = tr_acc
+            df = pd.concat([df, pd.Series(params).to_frame().T],ignore_index=True)
+    
+    df = df.groupby(keys,as_index=False).agg({"val_acc":"mean","tr_acc":"mean"})
+    df = df.sort_values(["val_acc","tr_acc"],ascending=[False,False])
+    df = df.iloc[:10]
+    print(df)
+    print("")
+
+# get_candidates("./models/model_1/results_000.csv")
+# get_candidates("./models/model_1/results_111.csv")
+# get_candidates("./models/model_1/results_222.csv")
+
+# get_candidates("./models/model_2/results_000.csv")
+# get_candidates("./models/model_2/results_111.csv")
+# get_candidates("./models/model_2/results_222.csv")
+
+# get_candidates("./models/model_3/results_000.csv")
+
+# get_candidates("./models/model_4/results_000.csv")
