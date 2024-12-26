@@ -301,6 +301,7 @@ def show_graph(accuracy, val_accuracy, loss, val_loss):
     plt.xlabel("Epochs")
     plt.ylabel("Loss")
     plt.legend()
+    plt.ylim(0,1.1)
 
     plt.subplot(1, 2, 2)
     plt.plot(accuracy, label="Training Accuracy")
@@ -309,6 +310,7 @@ def show_graph(accuracy, val_accuracy, loss, val_loss):
     plt.xlabel("Epochs")
     plt.ylabel("Accuracy")
     plt.legend()
+    plt.ylim(0,1.1)
 
     plt.show()
 
@@ -322,11 +324,11 @@ def manual_training(params, model, stage):
         show_graph(history.history["accuracy"],history.history["val_accuracy"],history.history["loss"],history.history["val_loss"])
         
         print(f"Current learning rate = {lr}, Current # of epochs = {epochs}")
-        lr_delta = float(input("Learining rate delta: "))
-        epoch_delta = int(input("Epochs delta: "))
+        lr_nxt = float(input("Learining rate: "))
+        epoch_nxt = int(input("Epochs: "))
         
-        epochs += epoch_delta
-        lr += lr_delta
+        epochs = epoch_nxt
+        lr = lr_nxt
 
 # MODEL 1
 # First classification
@@ -345,18 +347,46 @@ parameters = {"nol":3, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentr
 
 # MODEL 2
 # First classification
+
+# learning rate = 0.0001, epochs = 20
 parameters = {"nol":6, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
+# manual_training(parameters,2,1)
+
+# learning rate = 0.00013, epochs = 15
 parameters = {"nol":6, "nod":3, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
-manual_training(parameters,2,2)
+# manual_training(parameters,2,1)
+
+# learning rate = 0.0001, epochs = 15
 parameters = {"nol":7, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
+# manual_training(parameters,2,1)
+
 # Second classification
+
+# learning rate = 0.000065, epochs = 30
 parameters = {"nol":3, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
+# manual_training(parameters,2,2)
+
+# learning rate = 0.00005, epochs = 60
 parameters = {"nol":3, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
+# manual_training(parameters,2,2)
+
+# learning rate = 0.0004, epochs = 120
 parameters = {"nol":5, "nod":3, "af":"relu", "op":"rmsprop", "lo":"binary_crossentropy"}
+# manual_training(parameters,2,2)
+
 # Third classification
+
+# learning rate = 0.0006, epochs = 60
 parameters = {"nol":3, "nod":2, "af":"relu", "op":"rmsprop", "lo":"binary_crossentropy"}
+# manual_training(parameters,2,3)
+
+# learning rate = 0.0006, epochs = 80
 parameters = {"nol":3, "nod":3, "af":"relu", "op":"rmsprop", "lo":"binary_crossentropy"}
+# manual_training(parameters,2,3)
+
+# learning rate = 0.001, epochs = 50
 parameters = {"nol":4, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
+# manual_training(parameters,2,3)
 
 # MODEL 3
 parameters={"op":"adam","lo":"sparse_categorical_crossentropy","nod":1,"nn":512,"dim":(224,224)}
