@@ -320,30 +320,58 @@ def manual_training(params, model, stage):
     lr = initial_lrs[params["op"]]
 
     while True:
-        history = train(lr,epochs,model,stage,params)
-        show_graph(history.history["accuracy"],history.history["val_accuracy"],history.history["loss"],history.history["val_loss"])
-        
         print(f"Current learning rate = {lr}, Current # of epochs = {epochs}")
         lr_nxt = float(input("Learining rate: "))
         epoch_nxt = int(input("Epochs: "))
-        
+
         epochs = epoch_nxt
         lr = lr_nxt
 
+        history = train(lr,epochs,model,stage,params)
+        show_graph(history.history["accuracy"],history.history["val_accuracy"],history.history["loss"],history.history["val_loss"])
+
 # MODEL 1
 # First classification
+
+# learning rate = 0.0006, epochs = 15
 parameters = {"nol":4, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # manual_training(parameters,1,1)
+
+# learning rate = 0.0008, epochs = 15
 parameters = {"nol":4, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
+# manual_training(parameters,1,1)
+
+# learning rate = 0.0008, epochs = 15
 parameters = {"nol":5, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
+# manual_training(parameters,1,1)
+
 # Second classification
+
+# learning rate = 0.0009, epochs = 15
 parameters = {"nol":3, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
+# manual_training(parameters,1,2)
+
+# learning rate = 0.0001, epochs = 15
 parameters = {"nol":3, "nod":3, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
+# manual_training(parameters,1,2)
+
+# learning rate = 0.00005, epochs = 25
 parameters = {"nol":3, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
+# manual_training(parameters,1,2)
+
 # Third classification
+
+# learning rate = 0.00001, epochs = 20
 parameters = {"nol":3, "nod":3, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
+# manual_training(parameters,1,3)
+
+# learning rate = 0.000005, epochs = 50
 parameters = {"nol":4, "nod":3, "af":"relu", "op":"rmsprop", "lo":"binary_crossentropy"}
+# manual_training(parameters,1,3)
+
+# learning rate = 0.00001, epochs = 20
 parameters = {"nol":3, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
+# manual_training(parameters,1,3)
 
 # MODEL 2
 # First classification
