@@ -417,9 +417,19 @@ parameters = {"nol":4, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentr
 # manual_training(parameters,2,3)
 
 # MODEL 3
+
+# best val_accuracy: learning rate = 0.00001, epochs = 7
+# best loss function: learning rate = 0.000003, epochs = 5
 parameters={"op":"adam","lo":"sparse_categorical_crossentropy","nod":1,"nn":512,"dim":(224,224)}
+# manual_training(parameters,3,0)
+
+# learning rate = 0.00002, epochs = 10-15, val acc ~ 75
 parameters={"op":"sgd","lo":"sparse_categorical_crossentropy","nod":1,"nn":512,"dim":(224,224)}
+# manual_training(parameters,3,0)
+
+#
 parameters={"op":"sgd","lo":"sparse_categorical_crossentropy","nod":2,"nn":512,"dim":(224,224)}
+manual_training(parameters,3,0)
 
 # MODEL 4
 parameters={"op":"adam","lo":"sparse_categorical_crossentropy","nod":1,"nn":256,"dim":(299,299)}
