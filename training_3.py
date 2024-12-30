@@ -301,7 +301,6 @@ def show_graph(accuracy, val_accuracy, loss, val_loss):
     plt.xlabel("Epochs")
     plt.ylabel("Loss")
     plt.legend()
-    plt.ylim(0,1.1)
 
     plt.subplot(1, 2, 2)
     plt.plot(accuracy, label="Training Accuracy")
@@ -427,12 +426,21 @@ parameters={"op":"adam","lo":"sparse_categorical_crossentropy","nod":1,"nn":512,
 parameters={"op":"sgd","lo":"sparse_categorical_crossentropy","nod":1,"nn":512,"dim":(224,224)}
 # manual_training(parameters,3,0)
 
-#
+# learning rate = 0.00002, epochs = 10-15, val acc ~ 75
 parameters={"op":"sgd","lo":"sparse_categorical_crossentropy","nod":2,"nn":512,"dim":(224,224)}
-manual_training(parameters,3,0)
+# manual_training(parameters,3,0)
 
 # MODEL 4
-parameters={"op":"adam","lo":"sparse_categorical_crossentropy","nod":1,"nn":256,"dim":(299,299)}
-parameters={"op":"adam","lo":"sparse_categorical_crossentropy","nod":2,"nn":512,"dim":(299,299)}
-parameters={"op":"rmsprop","lo":"sparse_categorical_crossentropy","nod":1,"nn":256,"dim":(299,299)}
 
+# learning rate = 0.000001, epochs = 10, val acc ~ 65
+parameters={"op":"adam","lo":"sparse_categorical_crossentropy","nod":1,"nn":256,"dim":(299,299)}
+# manual_training(parameters,4,0)
+
+# best val_accuracy: learning rate = 0.000002, epochs = 10, val acc ~ 72
+# best loss function: learning rate = 0.000001, epochs = 10, val acc ~ 65
+parameters={"op":"adam","lo":"sparse_categorical_crossentropy","nod":2,"nn":512,"dim":(299,299)}
+# manual_training(parameters,4,0)
+
+# learning rate =  0.00001, epochs = 10, val acc ~ 75
+parameters={"op":"rmsprop","lo":"sparse_categorical_crossentropy","nod":1,"nn":256,"dim":(299,299)}
+# manual_training(parameters,4,0)
