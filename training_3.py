@@ -1,5 +1,6 @@
 import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+import shutil
 import csv
 import numpy as np
 from PIL import Image 
@@ -7,6 +8,7 @@ import tensorflow as tf, keras
 from sklearn.model_selection import train_test_split
 from tensorflow.keras import layers, models
 from tensorflow.keras.optimizers import Adam, RMSprop, SGD
+from tensorflow.keras.callbacks import ModelCheckpoint
 from random import randint
 import matplotlib.pyplot as plt
 
@@ -284,13 +286,26 @@ def train(lr, epochs, model, stage, params):
 
     compiled_model = get_model(lr,model,stage,params)
 
-    return compiled_model.fit(
+    checkpoint_callback = ModelCheckpoint(
+        "./models/manual_training/aux.keras",
+        monitor="val_accuracy",
+        mode="max",
+        save_best_only=True
+    )
+
+    history = compiled_model.fit(
         np.array(images_train),
         np.array(labels_train),
         shuffle=True,
         epochs=epochs,
         validation_data=(np.array(images_val), np.array(labels_val)),
+        callbacks = [checkpoint_callback]
     )
+
+    best_model = models.load_model("./models/manual_training/aux.keras")
+    test_loss, test_accuracy = best_model.evaluate(np.array(images_test), np.array(labels_test))
+    print(f"Test loss: {test_loss} Test accuracy: {test_accuracy}")
+    return history
 
 def show_graph(accuracy, val_accuracy, loss, val_loss):
     plt.figure(figsize=(12, 5))
@@ -329,48 +344,128 @@ def manual_training(params, model, stage):
         history = train(lr,epochs,model,stage,params)
         show_graph(history.history["accuracy"],history.history["val_accuracy"],history.history["loss"],history.history["val_loss"])
 
+def show_graph(name, accuracy, val_accuracy, loss, val_loss):
+    plt.figure(figsize=(12, 5))
+    plt.subplot(1, 2, 1)
+    plt.plot(loss, label="Entrenamiento")
+    plt.plot(val_loss, label="Validacion")
+    plt.title("Perdida de Entrenamiento y Validacion")
+    plt.xlabel("Epocas")
+    plt.ylabel("Perdida")
+    plt.legend()
+
+    plt.subplot(1, 2, 2)
+    plt.plot(accuracy, label="Entrenamiento")
+    plt.plot(val_accuracy, label="Validacion")
+    plt.title("Precision de Entrenamiento y Validacion")
+    plt.xlabel("Epocas")
+    plt.ylabel("Precision")
+    plt.legend()
+    plt.ylim(0,1.1)
+
+    path = "./models/manual_training/aux.png"
+    plt.savefig(path)
+    plt.show()
+
+def clean(name):
+    path = "./models/manual_training/"+name+".png"
+    if os.path.exists(path):
+        os.remove(path)
+    
+    path = "./models/manual_training/"+name+".keras"
+    if os.path.exists(path):
+        os.remove(path)
+
+def save_model(name):
+    shutil.copy(
+        "./models/manual_training/aux.keras",
+        "./models/manual_training/"+name+".keras"
+    )
+    shutil.copy(
+        "./models/manual_training/aux.png",
+        "./models/manual_training/"+name+".png"
+    )
+
+def get_best(params, model, stage, lr, epochs, name):
+    finished = False
+
+    while not finished:
+        history = train(lr,epochs,model,stage,params)
+
+        show_graph(
+            name,
+            history.history["accuracy"],
+            history.history["val_accuracy"],
+            history.history["loss"],
+            history.history["val_loss"]
+        )
+
+        save = str(input("Save model (Y/N)? "))
+        if save.upper() == "Y":
+            clean(name)
+            save_model(name)
+
+        finished = str(input("Continue (Y/N)? ")).upper()=="N"
+
 # MODEL 1
 # First classification
 
-# learning rate = 0.0006, epochs = 15
+# learning rate = 0.0004, epochs = 10
 parameters = {"nol":4, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # manual_training(parameters,1,1)
+# accuracy: 0.8225 - loss: 0.4240 - val_accuracy: 0.8850 - val_loss: 0.3883
+# Test loss: 0.383833646774292 Test accuracy: 0.8591549396514893
+# get_best(parameters,1,1,0.0004,15,"1-1-1")
 
 # learning rate = 0.0008, epochs = 15
 parameters = {"nol":4, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # manual_training(parameters,1,1)
+# accuracy: 0.9963 - loss: 0.0168 - val_accuracy: 0.8584 - val_loss: 0.6045
+# Test loss: 0.652563214302063 Test accuracy: 0.8591549396514893
+# get_best(parameters,1,1,0.0008,15,"1-1-2")
 
 # learning rate = 0.0008, epochs = 15
 parameters = {"nol":5, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # manual_training(parameters,1,1)
+# accuracy: 0.9691 - loss: 0.0751 - val_accuracy: 0.9469 - val_loss: 0.2049
+# Test loss: 0.3008792996406555 Test accuracy: 0.8802816867828369
+# get_best(parameters,1,1,0.0008,15,"1-1-3")
 
 # Second classification
 
-# learning rate = 0.0009, epochs = 15
+# learning rate = 0.00001, epochs = 15
 parameters = {"nol":3, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # manual_training(parameters,1,2)
+# accuracy: 0.7260 - loss: 0.5411 - val_accuracy: 0.7083 - val_loss: 0.6259
+# Test loss: 0.625292181968689 Test accuracy: 0.6333333253860474
+# get_best(parameters,1,2,0.00002,25,"1-2-1")
 
 # learning rate = 0.0001, epochs = 15
 parameters = {"nol":3, "nod":3, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # manual_training(parameters,1,2)
+get_best(parameters,1,2,0.0001,15,"1-2-2")
 
 # learning rate = 0.00005, epochs = 25
 parameters = {"nol":3, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # manual_training(parameters,1,2)
+get_best(parameters,1,2,0.00005,25,"1-2-3")
 
 # Third classification
 
 # learning rate = 0.00001, epochs = 20
 parameters = {"nol":3, "nod":3, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # manual_training(parameters,1,3)
+get_best(parameters,1,3,0.00001,20,"1-3-1")
 
 # learning rate = 0.000005, epochs = 50
 parameters = {"nol":4, "nod":3, "af":"relu", "op":"rmsprop", "lo":"binary_crossentropy"}
 # manual_training(parameters,1,3)
+get_best(parameters,1,3,0.000005,50,"1-3-2")
 
 # learning rate = 0.00001, epochs = 20
 parameters = {"nol":3, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # manual_training(parameters,1,3)
+get_best(parameters,1,3,0.00001,20,"1-3-3")
 
 # MODEL 2
 # First classification
