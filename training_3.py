@@ -440,32 +440,42 @@ parameters = {"nol":3, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentr
 # Test loss: 0.625292181968689 Test accuracy: 0.6333333253860474
 # get_best(parameters,1,2,0.00002,25,"1-2-1")
 
-# learning rate = 0.0001, epochs = 15
+# learning rate = 0.000005, epochs = 30
 parameters = {"nol":3, "nod":3, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # manual_training(parameters,1,2)
-get_best(parameters,1,2,0.0001,15,"1-2-2")
+# accuracy: 0.9745 - loss: 0.2467 - val_accuracy: 0.7292 - val_loss: 0.6130
+# Test loss: 0.6975075602531433 Test accuracy: 0.6166666746139526
+# get_best(parameters,1,2,0.000005,30,"1-2-2")
 
-# learning rate = 0.00005, epochs = 25
+# learning rate = 0.000005, epochs = 30
 parameters = {"nol":3, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # manual_training(parameters,1,2)
-get_best(parameters,1,2,0.00005,25,"1-2-3")
+# accuracy: 0.8560 - loss: 0.4749 - val_accuracy: 0.6458 - val_loss: 0.6399
+# Test loss: 0.6392707824707031 Test accuracy: 0.5833333134651184
+# get_best(parameters,1,2,0.000001,40,"1-2-3")
 
 # Third classification
 
 # learning rate = 0.00001, epochs = 20
 parameters = {"nol":3, "nod":3, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # manual_training(parameters,1,3)
-get_best(parameters,1,3,0.00001,20,"1-3-1")
+# accuracy: 0.8761 - loss: 0.3664 - val_accuracy: 0.7200 - val_loss: 0.6451
+# Test loss: 0.5422430634498596 Test accuracy: 0.7419354915618896
+# get_best(parameters,1,3,0.000001,30,"1-3-1")
 
 # learning rate = 0.000005, epochs = 50
 parameters = {"nol":4, "nod":3, "af":"relu", "op":"rmsprop", "lo":"binary_crossentropy"}
 # manual_training(parameters,1,3)
-get_best(parameters,1,3,0.000005,50,"1-3-2")
+# accuracy: 0.9268 - loss: 0.3500 - val_accuracy: 0.7200 - val_loss: 0.6655
+# Test loss: 0.608825147151947 Test accuracy: 0.774193525314331
+# get_best(parameters,1,3,0.000005,50,"1-3-2")
 
-# learning rate = 0.00001, epochs = 20
+# learning rate = 0.000003, epochs = 20
 parameters = {"nol":3, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # manual_training(parameters,1,3)
-get_best(parameters,1,3,0.00001,20,"1-3-3")
+# accuracy: 0.7250 - loss: 0.5962 - val_accuracy: 0.8400 - val_loss: 0.5713
+# Test loss: 0.5978801250457764 Test accuracy: 0.7419354915618896
+# get_best(parameters,1,3,0.000003,20,"1-3-3")
 
 # MODEL 2
 # First classification
@@ -473,42 +483,69 @@ get_best(parameters,1,3,0.00001,20,"1-3-3")
 # learning rate = 0.0001, epochs = 20
 parameters = {"nol":6, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # manual_training(parameters,2,1)
+# accuracy: 0.9777 - loss: 0.0645 - val_accuracy: 0.9912 - val_loss: 0.0460
+# Test loss: 0.13223440945148468 Test accuracy: 0.9436619877815247
+# get_best(parameters,2,1,0.0001,20,"2-1-1")
 
 # learning rate = 0.00013, epochs = 15
 parameters = {"nol":6, "nod":3, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # manual_training(parameters,2,1)
+# accuracy: 0.9743 - loss: 0.1024 - val_accuracy: 0.9823 - val_loss: 0.0575
+# Test loss: 0.03570772707462311 Test accuracy: 0.98591548204422
+# get_best(parameters,2,1,0.00013,15,"2-1-2")
 
 # learning rate = 0.0001, epochs = 15
 parameters = {"nol":7, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # manual_training(parameters,2,1)
+# accuracy: 0.9802 - loss: 0.0738 - val_accuracy: 0.9823 - val_loss: 0.0998
+# Test loss: 0.0901121199131012 Test accuracy: 0.9788732528686523
+# get_best(parameters,2,1,0.0001,15,"2-1-3")
 
 # Second classification
 
 # learning rate = 0.000065, epochs = 30
 parameters = {"nol":3, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # manual_training(parameters,2,2)
+# accuracy: 0.7971 - loss: 0.4486 - val_accuracy: 0.8333 - val_loss: 0.5100
+# Test loss: 0.64735347032547 Test accuracy: 0.6833333373069763
+# get_best(parameters,2,2,0.000065,60,"2-2-1")
 
 # learning rate = 0.00005, epochs = 60
 parameters = {"nol":3, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # manual_training(parameters,2,2)
+# accuracy: 0.7690 - loss: 0.5131 - val_accuracy: 0.8542 - val_loss: 0.4456
+# Test loss: 0.6869885921478271 Test accuracy: 0.7166666388511658
+# get_best(parameters,2,2,0.00005,60,"2-2-2")
 
 # learning rate = 0.0004, epochs = 120
 parameters = {"nol":5, "nod":3, "af":"relu", "op":"rmsprop", "lo":"binary_crossentropy"}
 # manual_training(parameters,2,2)
+# accuracy: 0.8166 - loss: 0.3429 - val_accuracy: 0.7500 - val_loss: 0.8068
+# Test loss: 1.051039218902588 Test accuracy: 0.7333333492279053
+# get_best(parameters,2,2,0.0004,120,"2-2-3")
 
 # Third classification
 
 # learning rate = 0.0006, epochs = 60
 parameters = {"nol":3, "nod":2, "af":"relu", "op":"rmsprop", "lo":"binary_crossentropy"}
 # manual_training(parameters,2,3)
+# accuracy: 0.9033 - loss: 0.2804 - val_accuracy: 0.8400 - val_loss: 0.5439
+# Test loss: 0.5232521891593933 Test accuracy: 0.7419354915618896
+# get_best(parameters,2,3,0.0006,60,"2-3-1")
 
 # learning rate = 0.0006, epochs = 80
 parameters = {"nol":3, "nod":3, "af":"relu", "op":"rmsprop", "lo":"binary_crossentropy"}
 # manual_training(parameters,2,3)
+# accuracy: 0.9743 - loss: 0.0951 - val_accuracy: 0.7600 - val_loss: 1.0937
+# Test loss: 0.6871079802513123 Test accuracy: 0.774193525314331
+# get_best(parameters,2,3,0.0006,80,"2-3-2")
 
 # learning rate = 0.001, epochs = 50
 parameters = {"nol":4, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
 # manual_training(parameters,2,3)
+# accuracy: 0.7982 - loss: 0.4003 - val_accuracy: 0.8400 - val_loss: 0.3582
+# Test loss: 0.7495732307434082 Test accuracy: 0.7096773982048035
+# get_best(parameters,2,3,0.003,40,"2-3-3")
 
 # MODEL 3
 
