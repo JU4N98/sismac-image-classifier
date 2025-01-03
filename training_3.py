@@ -553,14 +553,23 @@ parameters = {"nol":4, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentr
 # best loss function: learning rate = 0.000003, epochs = 5
 parameters={"op":"adam","lo":"sparse_categorical_crossentropy","nod":1,"nn":512,"dim":(224,224)}
 # manual_training(parameters,3,0)
+# accuracy: 0.9578 - loss: 0.2923 - val_accuracy: 0.6991 - val_loss: 0.8032
+# Test loss: 0.7380107045173645 Test accuracy: 0.7253521084785461
+# get_best(parameters,3,0,0.0000002,15,"3-0-1")
 
 # learning rate = 0.00002, epochs = 10-15, val acc ~ 75
 parameters={"op":"sgd","lo":"sparse_categorical_crossentropy","nod":1,"nn":512,"dim":(224,224)}
 # manual_training(parameters,3,0)
+# accuracy: 0.9562 - loss: 0.2426 - val_accuracy: 0.6991 - val_loss: 0.8470
+# Test loss: 0.7674881219863892 Test accuracy: 0.7253521084785461
+# get_best(parameters,3,0,0.00002,15,"3-0-2")
 
 # learning rate = 0.00002, epochs = 10-15, val acc ~ 75
 parameters={"op":"sgd","lo":"sparse_categorical_crossentropy","nod":2,"nn":512,"dim":(224,224)}
 # manual_training(parameters,3,0)
+# accuracy: 0.9130 - loss: 0.4402 - val_accuracy: 0.7345 - val_loss: 0.8204
+# Test loss: 0.7399268746376038 Test accuracy: 0.7605633735656738
+# get_best(parameters,3,0,0.00002,15,"3-0-3")
 
 # MODEL 4
 
