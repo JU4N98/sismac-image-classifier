@@ -576,12 +576,21 @@ parameters={"op":"sgd","lo":"sparse_categorical_crossentropy","nod":2,"nn":512,"
 # learning rate = 0.000001, epochs = 10, val acc ~ 65
 parameters={"op":"adam","lo":"sparse_categorical_crossentropy","nod":1,"nn":256,"dim":(299,299)}
 # manual_training(parameters,4,0)
+# accuracy: 0.9829 - loss: 0.1063 - val_accuracy: 0.6195 - val_loss: 1.7701
+# Test loss: 1.9196953773498535 Test accuracy: 0.6126760840415955
+# get_best(parameters,4,0,0.0000005,20,"4-0-1")
 
 # best val_accuracy: learning rate = 0.000002, epochs = 10, val acc ~ 72
 # best loss function: learning rate = 0.000001, epochs = 10, val acc ~ 65
 parameters={"op":"adam","lo":"sparse_categorical_crossentropy","nod":2,"nn":512,"dim":(299,299)}
 # manual_training(parameters,4,0)
+# accuracy: 1.0000 - loss: 0.0237 - val_accuracy: 0.6814 - val_loss: 1.6278
+# Test loss: 1.4022865295410156 Test accuracy: 0.7042253613471985
+# get_best(parameters,4,0,0.000002,10,"4-0-2")
 
-# learning rate =  0.00001, epochs = 10, val acc ~ 75
+# learning rate =  0.000005, epochs = 10, val acc ~ 75
 parameters={"op":"rmsprop","lo":"sparse_categorical_crossentropy","nod":1,"nn":256,"dim":(299,299)}
 # manual_training(parameters,4,0)
+# accuracy: 0.9666 - loss: 0.1273 - val_accuracy: 0.7168 - val_loss: 1.4690
+# Test loss: 1.091317057609558 Test accuracy: 0.7464788556098938
+get_best(parameters,4,0,0.000005,10,"4-0-3")
