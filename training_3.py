@@ -233,7 +233,6 @@ def get_dataset(model, stage):
         header = next(csv_reader)
         for row in csv_reader:
             image = np.array(Image.open(os.path.join(dataset_path,row[0]+".jpg")))
-            
             get_label_2 = {}
             if model == 1 or model == 2:
                 get_label_2  = get_label[model][stage]
@@ -593,4 +592,4 @@ parameters={"op":"rmsprop","lo":"sparse_categorical_crossentropy","nod":1,"nn":2
 # manual_training(parameters,4,0)
 # accuracy: 0.9666 - loss: 0.1273 - val_accuracy: 0.7168 - val_loss: 1.4690
 # Test loss: 1.091317057609558 Test accuracy: 0.7464788556098938
-get_best(parameters,4,0,0.000005,10,"4-0-3")
+# get_best(parameters,4,0,0.000005,10,"4-0-3")

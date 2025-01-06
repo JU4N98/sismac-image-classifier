@@ -7,6 +7,7 @@ df = pd.read_csv("dataset/labels.csv", sep=",")
 tgt = df["label"]
 
 sorted_tgt = tgt.sort_values()
+# print(sorted_tgt.value_counts())
 
 sea.countplot(x=sorted_tgt, order=sorted_tgt.unique()) 
 plt.title("Histograma de frecuencias de clases")
