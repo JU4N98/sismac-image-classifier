@@ -8,6 +8,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import tensorflow as tf, keras
 from tensorflow.keras.models import load_model
+import seaborn as sea
 from sklearn.metrics import classification_report, confusion_matrix
 
 
@@ -134,7 +135,7 @@ def load_model(model):
         paths = [
             "./models/manual_training/2-1-2.keras", 
             "./models/manual_training/2-2-3.keras", 
-            "./models/manual_training/2-3-2.keras"
+            "./models/manual_training/2-3-3.keras"
         ]
         return load_binary_model(paths)
     elif model == 3:
@@ -173,7 +174,7 @@ def get_dataset(model):
                 labels.append(3)
             else:
                 continue
-
+            
             image = np.array(Image.open(os.path.join(dataset_path,row[0]+".jpg")))
             if model == 1:
                 images.append(image)
@@ -200,19 +201,58 @@ def get_binary_prediction(models, image):
 def get_multiclass_prediction(model, image):
     return np.argmax(model.predict(image, verbose=0),axis=-1)[0]
 
+def show_graphs(labels, predictions):
+    confu_matrix = confusion_matrix(labels,predictions)
+    
+
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+
+    sea.heatmap(confu_matrix, annot=True, fmt="d", cmap="plasma", ax=axes[0])
+    axes[0].set_title("Matriz de confusion")
+    axes[0].set_xlabel("Etiquetas predichas")
+    axes[0].set_ylabel("Etiquetas reales")
+
+    class_report = classification_report(labels,predictions,output_dict=True)
+    print(class_report)
+    report_df = pd.DataFrame(class_report).transpose()
+    class_metrics = report_df.drop(["accuracy", "macro avg", "weighted avg"])
+    class_metrics.rename(columns={"precision": "Precision","recall": "Sensibilidad","f1-score": "Puntaje F1"}, inplace=True)
+    bar_chart = class_metrics[["Precision", "Sensibilidad", "Puntaje F1"]].plot(kind="bar", ax=axes[1], colormap="plasma", rot=0)
+    axes[1].set_title("Reporte de clasificacion por clase")
+    axes[1].set_xlabel("Clases")
+    axes[1].set_ylabel("Puntaje")
+    axes[1].set_ylim(0, 1.1)
+    axes[1].legend(loc="lower right")
+    axes[1].grid(axis="y")
+
+    for container in bar_chart.containers:
+        for bar in container:
+            height = bar.get_height()
+            bar_chart.annotate(f'{height:.2f}', 
+                            xy=(bar.get_x() + bar.get_width() / 2, height), 
+                            xytext=(0, 3),
+                            textcoords="offset points", 
+                            ha="center", va="bottom",
+                            rotation=90
+            )
+
+    plt.tight_layout()
+    plt.show()
+
+def test_model(m):
+    model = load_model(m)
+    images, labels = get_dataset(m)
+    predictions = []
+    for image in images:
+        if m <= 2:
+            predictions.append(get_binary_prediction(model,np.array([image])))
+        else:
+            predictions.append(get_multiclass_prediction(model,np.array([image])))
+    show_graphs(labels, predictions)
+
 def test_models():
     for m in range(1,5):
-        model = load_model(m)
-        images, labels = get_dataset(m)
-        predictions = []
-        for image in images:
-            if m <= 2:
-                predictions.append(get_binary_prediction(model,np.array([image])))
-            else:
-                predictions.append(get_multiclass_prediction(model,np.array([image])))
-        class_report = classification_report(labels,predictions)
-        confu_matrix = confusion_matrix(labels,predictions)
-        print(class_report)
-        print(confu_matrix)
+        test_model(m)
 
-test_models()
+# test_models()
+test_model(2)
