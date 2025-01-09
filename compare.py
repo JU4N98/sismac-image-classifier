@@ -218,8 +218,8 @@ def show_graphs(labels, predictions):
     class_metrics = report_df.drop(["accuracy", "macro avg", "weighted avg"])
     class_metrics.rename(columns={"precision": "Precision","recall": "Sensibilidad","f1-score": "Puntaje F1"}, inplace=True)
     bar_chart = class_metrics[["Precision", "Sensibilidad", "Puntaje F1"]].plot(kind="bar", ax=axes[1], colormap="plasma", rot=0)
-    axes[1].set_title("Reporte de clasificacion por clase")
-    axes[1].set_xlabel("Clases")
+    axes[1].set_title("Reporte de clasificacion por etiqueta")
+    axes[1].set_xlabel("Etiquetas")
     axes[1].set_ylabel("Puntaje")
     axes[1].set_ylim(0, 1.1)
     axes[1].legend(loc="lower right")
@@ -228,12 +228,13 @@ def show_graphs(labels, predictions):
     for container in bar_chart.containers:
         for bar in container:
             height = bar.get_height()
-            bar_chart.annotate(f'{height:.2f}', 
-                            xy=(bar.get_x() + bar.get_width() / 2, height), 
-                            xytext=(0, 3),
-                            textcoords="offset points", 
-                            ha="center", va="bottom",
-                            rotation=90
+            bar_chart.annotate(
+                f"{height:.2f}", 
+                xy=(bar.get_x() + bar.get_width() / 2, height), 
+                xytext=(0, 3),
+                textcoords="offset points", 
+                ha="center", va="bottom",
+                rotation=90
             )
 
     plt.tight_layout()

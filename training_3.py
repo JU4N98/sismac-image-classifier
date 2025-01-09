@@ -3,6 +3,7 @@ os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 import shutil
 import csv
 import numpy as np
+import pandas as pd
 from PIL import Image 
 import tensorflow as tf, keras
 from sklearn.model_selection import train_test_split
@@ -11,6 +12,8 @@ from tensorflow.keras.optimizers import Adam, RMSprop, SGD
 from tensorflow.keras.callbacks import ModelCheckpoint
 from random import randint
 import matplotlib.pyplot as plt
+import seaborn as sea
+from sklearn.metrics import classification_report, confusion_matrix
 
 INPUT_SHAPE_1 = (78,86,1)
 INPUT_SHAPE_2 = (256,1)
@@ -302,67 +305,75 @@ def train(lr, epochs, model, stage, params):
     )
 
     best_model = models.load_model("./models/manual_training/aux.keras")
+    
     test_loss, test_accuracy = best_model.evaluate(np.array(images_test), np.array(labels_test))
-    print(f"Test loss: {test_loss} Test accuracy: {test_accuracy}")
-    return history
+    print(f"Test accuracy: {test_accuracy} - Test loss: {test_loss} ")
+    
+    predicted_test = best_model.predict(np.array(images_test), verbose=0)
+    if model <= 2:
+        predicted_test = (predicted_test >= 0.5).astype(int)
+    else:
+        predicted_test = np.argmax(predicted_test, axis=1)
+    
+    return history, labels_test, predicted_test
 
-def show_graph(accuracy, val_accuracy, loss, val_loss):
-    plt.figure(figsize=(12, 5))
-    plt.subplot(1, 2, 1)
-    plt.plot(loss, label="Training Loss")
-    plt.plot(val_loss, label="Validation Loss")
-    plt.title("Loss")
-    plt.xlabel("Epochs")
-    plt.ylabel("Loss")
-    plt.legend()
+def show_graph(name, history, labels, predictions):
+    accuracy = history.history["accuracy"]
+    val_accuracy = history.history["val_accuracy"]
+    loss = history.history["loss"]
+    val_loss = history.history["val_loss"]
+    
+    fig, axes = plt.subplots(2, 2, figsize=(8, 8))
 
-    plt.subplot(1, 2, 2)
-    plt.plot(accuracy, label="Training Accuracy")
-    plt.plot(val_accuracy, label="Validation Accuracy")
-    plt.title("Accuracy")
-    plt.xlabel("Epochs")
-    plt.ylabel("Accuracy")
-    plt.legend()
-    plt.ylim(0,1.1)
+    axes[0,0].plot(loss, label="Entrenamiento")
+    axes[0,0].plot(val_loss, label="Validacion")
+    axes[0,0].set_title("Perdida de Entrenamiento y Validacion")
+    axes[0,0].set_xlabel("Epocas")
+    axes[0,0].set_ylabel("Perdida")
+    axes[0,0].legend()
 
-    plt.show()
+    axes[0,1].plot(accuracy, label="Entrenamiento")
+    axes[0,1].plot(val_accuracy, label="Validacion")
+    axes[0,1].set_title("Precision de Entrenamiento y Validacion")
+    axes[0,1].set_xlabel("Epocas")
+    axes[0,1].set_ylabel("Precision")
+    axes[0,1].legend()
+    axes[0,1].set_ylim(0,1.1)
 
-def manual_training(params, model, stage):
-    epochs = 15
-    initial_lrs = {"adam":0.001,"sgd":0.01,"rmsprop":0.01}
-    lr = initial_lrs[params["op"]]
+    confu_matrix = confusion_matrix(labels,predictions)
 
-    while True:
-        print(f"Current learning rate = {lr}, Current # of epochs = {epochs}")
-        lr_nxt = float(input("Learining rate: "))
-        epoch_nxt = int(input("Epochs: "))
+    sea.heatmap(confu_matrix, annot=True, fmt="d", cmap="plasma", ax=axes[1,0])
+    axes[1,0].set_title("Matriz de confusion")
+    axes[1,0].set_xlabel("Etiquetas predichas")
+    axes[1,0].set_ylabel("Etiquetas reales")
 
-        epochs = epoch_nxt
-        lr = lr_nxt
+    class_report = classification_report(labels,predictions,output_dict=True)
+    print(class_report)
+    report_df = pd.DataFrame(class_report).transpose()
+    class_metrics = report_df.drop(["accuracy", "macro avg", "weighted avg"])
+    class_metrics.rename(columns={"precision": "Precision","recall": "Sensibilidad","f1-score": "Puntaje F1"}, inplace=True)
+    bar_chart = class_metrics[["Precision", "Sensibilidad", "Puntaje F1"]].plot(kind="bar", ax=axes[1,1], colormap="plasma", rot=0)
+    axes[1,1].set_title("Reporte de clasificacion por etiqueta")
+    axes[1,1].set_xlabel("Etiquetas")
+    axes[1,1].set_ylabel("Puntaje")
+    axes[1,1].set_ylim(0, 1.1)
+    axes[1,1].legend(loc="lower right")
+    axes[1,1].grid(axis="y")
 
-        history = train(lr,epochs,model,stage,params)
-        show_graph(history.history["accuracy"],history.history["val_accuracy"],history.history["loss"],history.history["val_loss"])
-
-def show_graph(name, accuracy, val_accuracy, loss, val_loss):
-    plt.figure(figsize=(12, 5))
-    plt.subplot(1, 2, 1)
-    plt.plot(loss, label="Entrenamiento")
-    plt.plot(val_loss, label="Validacion")
-    plt.title("Perdida de Entrenamiento y Validacion")
-    plt.xlabel("Epocas")
-    plt.ylabel("Perdida")
-    plt.legend()
-
-    plt.subplot(1, 2, 2)
-    plt.plot(accuracy, label="Entrenamiento")
-    plt.plot(val_accuracy, label="Validacion")
-    plt.title("Precision de Entrenamiento y Validacion")
-    plt.xlabel("Epocas")
-    plt.ylabel("Precision")
-    plt.legend()
-    plt.ylim(0,1.1)
+    for container in bar_chart.containers:
+        for bar in container:
+            height = bar.get_height()
+            bar_chart.annotate(
+                f"{height:.2f}", 
+                xy=(bar.get_x() + bar.get_width() / 2, height), 
+                xytext=(0, 3),
+                textcoords="offset points", 
+                ha="center", va="bottom",
+                rotation=90
+            )
 
     path = "./models/manual_training/aux.png"
+    plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1, hspace=0.4, wspace=0.4)
     plt.savefig(path)
     plt.show()
 
@@ -389,15 +400,9 @@ def get_best(params, model, stage, lr, epochs, name):
     finished = False
 
     while not finished:
-        history = train(lr,epochs,model,stage,params)
+        history, labels, predictions, = train(lr,epochs,model,stage,params)
 
-        show_graph(
-            name,
-            history.history["accuracy"],
-            history.history["val_accuracy"],
-            history.history["loss"],
-            history.history["val_loss"]
-        )
+        show_graph(name,history,labels,predictions)
 
         save = str(input("Save model (Y/N)? "))
         if save.upper() == "Y":
@@ -409,71 +414,62 @@ def get_best(params, model, stage, lr, epochs, name):
 # MODEL 1
 # First classification
 
-# learning rate = 0.0004, epochs = 10
+# learning rate = 0.0002, epochs = 10
 parameters = {"nol":4, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
-# manual_training(parameters,1,1)
-# accuracy: 0.8225 - loss: 0.4240 - val_accuracy: 0.8850 - val_loss: 0.3883
-# Test loss: 0.383833646774292 Test accuracy: 0.8591549396514893
-# get_best(parameters,1,1,0.0004,15,"1-1-1")
+# accuracy: 0.9588 - loss: 0.0893 - val_accuracy: 0.9115 - val_loss: 0.3373
+# Test accuracy: 0.8591549396514893 - Test loss: 0.3674169182777405
+# get_best(parameters,1,1,0.0002,15,"1-1-1")
 
-# learning rate = 0.0008, epochs = 15
+# learning rate = 0.0001, epochs = 15
 parameters = {"nol":4, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
-# manual_training(parameters,1,1)
-# accuracy: 0.9963 - loss: 0.0168 - val_accuracy: 0.8584 - val_loss: 0.6045
-# Test loss: 0.652563214302063 Test accuracy: 0.8591549396514893
-# get_best(parameters,1,1,0.0008,15,"1-1-2")
+# accuracy: 0.9937 - loss: 0.0818 - val_accuracy: 0.8407 - val_loss: 0.5585
+# Test accuracy: 0.8450704216957092 - Test loss: 0.4858243763446808
+# get_best(parameters,1,1,0.0001,15,"1-1-2")
 
-# learning rate = 0.0008, epochs = 15
+# learning rate = 0.0001, epochs = 15
 parameters = {"nol":5, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
-# manual_training(parameters,1,1)
-# accuracy: 0.9691 - loss: 0.0751 - val_accuracy: 0.9469 - val_loss: 0.2049
-# Test loss: 0.3008792996406555 Test accuracy: 0.8802816867828369
-# get_best(parameters,1,1,0.0008,15,"1-1-3")
+# accuracy: 0.9606 - loss: 0.1481 - val_accuracy: 0.8230 - val_loss: 0.5479
+# Test accuracy: 0.8309859037399292 - Test loss: 0.4733295738697052
+# get_best(parameters,1,1,0.0001,15,"1-1-3")
 
 # Second classification
 
-# learning rate = 0.00001, epochs = 15
+# learning rate = 0.00002, epochs = 25
 parameters = {"nol":3, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
-# manual_training(parameters,1,2)
-# accuracy: 0.7260 - loss: 0.5411 - val_accuracy: 0.7083 - val_loss: 0.6259
-# Test loss: 0.625292181968689 Test accuracy: 0.6333333253860474
+# accuracy: 0.8938 - loss: 0.3383 - val_accuracy: 0.7083 - val_loss: 0.6481
+# Test accuracy: 0.6333333253860474 - Test loss: 0.7052309513092041
 # get_best(parameters,1,2,0.00002,25,"1-2-1")
 
 # learning rate = 0.000005, epochs = 30
 parameters = {"nol":3, "nod":3, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
-# manual_training(parameters,1,2)
-# accuracy: 0.9745 - loss: 0.2467 - val_accuracy: 0.7292 - val_loss: 0.6130
-# Test loss: 0.6975075602531433 Test accuracy: 0.6166666746139526
+# accuracy: 0.8745 - loss: 0.3140 - val_accuracy: 0.6667 - val_loss: 0.7751
+# Test accuracy: 0.5833333134651184 - Test loss: 0.736777126789093
 # get_best(parameters,1,2,0.000005,30,"1-2-2")
 
-# learning rate = 0.000005, epochs = 30
+# learning rate = 0.000001, epochs = 40
 parameters = {"nol":3, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
-# manual_training(parameters,1,2)
-# accuracy: 0.8560 - loss: 0.4749 - val_accuracy: 0.6458 - val_loss: 0.6399
-# Test loss: 0.6392707824707031 Test accuracy: 0.5833333134651184
+# accuracy: 0.8873 - loss: 0.4325 - val_accuracy: 0.7083 - val_loss: 0.6591
+# Test accuracy: 0.6333333253860474 - Test loss: 0.6973279118537903
 # get_best(parameters,1,2,0.000001,40,"1-2-3")
 
 # Third classification
 
 # learning rate = 0.00001, epochs = 20
 parameters = {"nol":3, "nod":3, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
-# manual_training(parameters,1,3)
-# accuracy: 0.8761 - loss: 0.3664 - val_accuracy: 0.7200 - val_loss: 0.6451
-# Test loss: 0.5422430634498596 Test accuracy: 0.7419354915618896
-# get_best(parameters,1,3,0.000001,30,"1-3-1")
+# accuracy: 0.9463 - loss: 0.3261 - val_accuracy: 0.8000 - val_loss: 0.5283
+# Test accuracy: 0.7419354915618896 - Test loss: 0.5519568920135498
+# get_best(parameters,1,3,0.0000005,30,"1-3-1")
 
 # learning rate = 0.000005, epochs = 50
 parameters = {"nol":4, "nod":3, "af":"relu", "op":"rmsprop", "lo":"binary_crossentropy"}
-# manual_training(parameters,1,3)
-# accuracy: 0.9268 - loss: 0.3500 - val_accuracy: 0.7200 - val_loss: 0.6655
-# Test loss: 0.608825147151947 Test accuracy: 0.774193525314331
-# get_best(parameters,1,3,0.000005,50,"1-3-2")
+# accuracy: 0.8496 - loss: 0.4992 - val_accuracy: 0.8000 - val_loss: 0.5807
+# Test accuracy: 0.774193525314331 - Test loss: 0.5893510580062866
+# get_best(parameters,1,3,0.000005,25,"1-3-2")
 
 # learning rate = 0.000003, epochs = 20
 parameters = {"nol":3, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
-# manual_training(parameters,1,3)
-# accuracy: 0.7250 - loss: 0.5962 - val_accuracy: 0.8400 - val_loss: 0.5713
-# Test loss: 0.5978801250457764 Test accuracy: 0.7419354915618896
+# accuracy: 0.8698 - loss: 0.3745 - val_accuracy: 0.8400 - val_loss: 0.4352
+# Test accuracy: 0.774193525314331 - Test loss: 0.66941899061203
 # get_best(parameters,1,3,0.000003,20,"1-3-3")
 
 # MODEL 2
@@ -481,70 +477,61 @@ parameters = {"nol":3, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentr
 
 # learning rate = 0.0001, epochs = 20
 parameters = {"nol":6, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
-# manual_training(parameters,2,1)
-# accuracy: 0.9777 - loss: 0.0645 - val_accuracy: 0.9912 - val_loss: 0.0460
-# Test loss: 0.13223440945148468 Test accuracy: 0.9436619877815247
+# accuracy: 0.9828 - loss: 0.0806 - val_accuracy: 0.9912 - val_loss: 0.0387
+# Test accuracy: 0.98591548204422 - Test loss: 0.05162227526307106
 # get_best(parameters,2,1,0.0001,20,"2-1-1")
 
 # learning rate = 0.00013, epochs = 15
 parameters = {"nol":6, "nod":3, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
-# manual_training(parameters,2,1)
-# accuracy: 0.9743 - loss: 0.1024 - val_accuracy: 0.9823 - val_loss: 0.0575
-# Test loss: 0.03570772707462311 Test accuracy: 0.98591548204422
+# accuracy: 0.9698 - loss: 0.0760 - val_accuracy: 0.9735 - val_loss: 0.0948
+# Test accuracy: 0.98591548204422 - Test loss: 0.047185152769088745
 # get_best(parameters,2,1,0.00013,15,"2-1-2")
 
 # learning rate = 0.0001, epochs = 15
 parameters = {"nol":7, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
-# manual_training(parameters,2,1)
-# accuracy: 0.9802 - loss: 0.0738 - val_accuracy: 0.9823 - val_loss: 0.0998
-# Test loss: 0.0901121199131012 Test accuracy: 0.9788732528686523
+# accuracy: 0.9678 - loss: 0.0726 - val_accuracy: 0.9735 - val_loss: 0.1413
+# Test accuracy: 0.9929577708244324 - Test loss: 0.09313762187957764
 # get_best(parameters,2,1,0.0001,15,"2-1-3")
 
 # Second classification
 
 # learning rate = 0.000065, epochs = 30
 parameters = {"nol":3, "nod":2, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
-# manual_training(parameters,2,2)
-# accuracy: 0.7971 - loss: 0.4486 - val_accuracy: 0.8333 - val_loss: 0.5100
-# Test loss: 0.64735347032547 Test accuracy: 0.6833333373069763
+# accuracy: 0.7658 - loss: 0.5162 - val_accuracy: 0.7708 - val_loss: 0.5879
+# Test accuracy: 0.7833333611488342 - Test loss: 0.5252394080162048
 # get_best(parameters,2,2,0.000065,60,"2-2-1")
 
 # learning rate = 0.00005, epochs = 60
 parameters = {"nol":3, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
-# manual_training(parameters,2,2)
-# accuracy: 0.7690 - loss: 0.5131 - val_accuracy: 0.8542 - val_loss: 0.4456
-# Test loss: 0.6869885921478271 Test accuracy: 0.7166666388511658
-# get_best(parameters,2,2,0.00005,60,"2-2-2")
+# accuracy: 0.7615 - loss: 0.4999 - val_accuracy: 0.7708 - val_loss: 0.5040
+# Test accuracy: 0.699999988079071 - Test loss: 0.6140607595443726
+# get_best(parameters,2,2,0.00005,30,"2-2-2")
 
 # learning rate = 0.0004, epochs = 120
 parameters = {"nol":5, "nod":3, "af":"relu", "op":"rmsprop", "lo":"binary_crossentropy"}
-# manual_training(parameters,2,2)
-# accuracy: 0.8166 - loss: 0.3429 - val_accuracy: 0.7500 - val_loss: 0.8068
-# Test loss: 1.051039218902588 Test accuracy: 0.7333333492279053
+# accuracy: 0.8149 - loss: 0.3959 - val_accuracy: 0.8125 - val_loss: 0.6067
+# Test accuracy: 0.7666666507720947 - Test loss: 0.6400676965713501
 # get_best(parameters,2,2,0.0004,120,"2-2-3")
 
 # Third classification
 
 # learning rate = 0.0006, epochs = 60
 parameters = {"nol":3, "nod":2, "af":"relu", "op":"rmsprop", "lo":"binary_crossentropy"}
-# manual_training(parameters,2,3)
-# accuracy: 0.9033 - loss: 0.2804 - val_accuracy: 0.8400 - val_loss: 0.5439
-# Test loss: 0.5232521891593933 Test accuracy: 0.7419354915618896
+# accuracy: 0.8536 - loss: 0.3200 - val_accuracy: 0.8000 - val_loss: 0.6142
+# Test accuracy: 0.8064516186714172 - Test loss: 0.46981459856033325
 # get_best(parameters,2,3,0.0006,60,"2-3-1")
 
 # learning rate = 0.0006, epochs = 80
 parameters = {"nol":3, "nod":3, "af":"relu", "op":"rmsprop", "lo":"binary_crossentropy"}
-# manual_training(parameters,2,3)
-# accuracy: 0.9743 - loss: 0.0951 - val_accuracy: 0.7600 - val_loss: 1.0937
-# Test loss: 0.6871079802513123 Test accuracy: 0.774193525314331
+# accuracy: 0.8138 - loss: 0.3005 - val_accuracy: 0.8400 - val_loss: 0.5291
+# Test accuracy: 0.7419354915618896 - Test loss: 0.563089668750762
 # get_best(parameters,2,3,0.0006,80,"2-3-2")
 
-# learning rate = 0.001, epochs = 50
+# learning rate = 0.0002, epochs = 50
 parameters = {"nol":4, "nod":4, "af":"relu", "op":"adam", "lo":"binary_crossentropy"}
-# manual_training(parameters,2,3)
-# accuracy: 0.7982 - loss: 0.4003 - val_accuracy: 0.8400 - val_loss: 0.3582
-# Test loss: 0.7495732307434082 Test accuracy: 0.7096773982048035
-# get_best(parameters,2,3,0.003,40,"2-3-3")
+# accuracy: 0.8545 - loss: 0.3495 - val_accuracy: 0.8000 - val_loss: 0.7364
+# Test accuracy: 0.6774193644523621 - Test loss: 0.8462388515472412
+# get_best(parameters,2,3,0.0002,50,"2-3-3")
 
 # MODEL 3
 
