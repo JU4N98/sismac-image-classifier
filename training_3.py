@@ -573,4 +573,4 @@ parameters={"op":"adam","lo":"sparse_categorical_crossentropy","nod":2,"nn":512,
 parameters={"op":"rmsprop","lo":"sparse_categorical_crossentropy","nod":1,"nn":256,"dim":(299,299)}
 # accuracy: 0.9211 - loss: 0.2926 - val_accuracy: 0.7611 - val_loss: 1.4037
 # Test accuracy: 0.7605633735656738 - Test loss: 1.2567527294158936 
-get_best(parameters,4,0,0.0000001,10,"4-0-3")
+# get_best(parameters,4,0,0.0000002,25,"4-0-3")
