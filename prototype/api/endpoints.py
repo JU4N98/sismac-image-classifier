@@ -1,5 +1,5 @@
-from schemas import ReportSchema
-from models import Report
+from schemas import ReportSchema, ImageSchema
+from models import Report, Image
 from flask import request, jsonify
 from db import db
 from predict import predict
@@ -24,3 +24,11 @@ def init_routes(app):
     def get_report(reportId:int):
         report = Report.query.get(reportId)
         return jsonify(ReportSchema(many=False).dump(report)), 200
+    
+    @app.route("/image/<imageId>", methods=["PUT"])
+    def update_report(imageId:int):
+        failure = ImageSchema().load(request.json).failure
+        image = Image.query.get(imageId)
+        image.failure = failure
+        db.session.commit()
+        return {}, 200

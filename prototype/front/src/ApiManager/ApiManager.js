@@ -37,3 +37,14 @@ export const getReport = async (reportId) => {
     );
     return response;
 }
+
+export const putImage = async (imageId, image) => {
+    const url = ENDPOINTS.UPDATE_IMAGE(imageId);
+    return await axios.put(
+        url,
+        image,
+        {
+            headers: {"Content-Type": "application/json"}
+        },
+    );
+}

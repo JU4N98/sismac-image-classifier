@@ -18,3 +18,4 @@ def predict(images):
         data = image.file.split(",")[1]
         bytes = base64.b64decode(data)
         image.failure = predict_image(bytes)
+        image.predicted_failure = image.failure

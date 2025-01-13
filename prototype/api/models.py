@@ -16,3 +16,4 @@ class Image(db.Model):
     file = db.Column(db.String)
     report_id = db.Column(db.Integer, db.ForeignKey("report.id"))
     failure = db.Column(db.String, default="sin defectos")
+    predicted_failure = db.Column(db.String, default="sin defectos")

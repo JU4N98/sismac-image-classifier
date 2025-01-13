@@ -4,6 +4,7 @@ import NavBar from './Navbar/NavBar';
 import ReportForm from "./Report/CreateReport";
 import ReportList from "./Report/ListReport";
 import { ReportDetail } from "./Report/DetailReport";
+import "bootstrap-icons/font/bootstrap-icons.css"
 
 const App = () => {
   return (

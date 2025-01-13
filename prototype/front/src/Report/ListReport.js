@@ -15,7 +15,7 @@ const ReportList = () => {
         .catch((error)=>{
             console.log(error);
         })
-    },[]);
+    },[page]);
 
     const handleView = (reportId) => {
       navigate(`/listReport/${reportId}`);
@@ -35,7 +35,7 @@ const ReportList = () => {
         <thead>
           <tr >
             <th styles={{
-                width:"20%"
+                width:"25%"
             }}>Fecha</th>
             <th>Nombre</th>
             <th style={{
@@ -48,7 +48,7 @@ const ReportList = () => {
             <tr key={index}>
               <td style={{
                  textAlign:"left",
-                 width:"20%"
+                 width:"25%"
               }}>{report.date}</td>
               <td style={{
                  textAlign:"left"

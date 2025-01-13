@@ -6,6 +6,7 @@ class ImageSchema(Schema):
     file = fields.Str(required=True)
     name = fields.Str(required=True)
     failure = fields.Str(required=False)
+    predicted_failure = fields.Str(required=False)
 
     @post_load
     def make_image(self, data, **kwargs):
