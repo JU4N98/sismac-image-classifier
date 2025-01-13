@@ -21,7 +21,7 @@ DB_HOST:str = os.getenv("DB_HOST")
 DB_PORT:str = os.getenv("DB_PORT")
 DB_NAME:str = os.getenv("DB_NAME")
 app = Flask(__name__)
-CORS(app,  origins="http://localhost:3000")
+CORS(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql+psycopg2://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 db.init_app(app)

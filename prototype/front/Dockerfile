@@ -5,7 +5,8 @@ COPY package*.json ./
 COPY . .
 RUN npm install
 RUN npm run build --production
-
+RUN npm install bootstrap@3
+RUN npm install bootstrap-icons
 # RUN npm install -g serve
 
 # EXPOSE 5000
