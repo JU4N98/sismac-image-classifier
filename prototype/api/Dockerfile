@@ -1,6 +1,6 @@
 FROM python:3.6.10-slim-buster
 WORKDIR /api
-COPY * ./
+COPY . ./
 
 RUN apt-get update \
     && pip install --upgrade pip \
