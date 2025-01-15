@@ -1,0 +1,39 @@
+version: '3.0'
+
+services:
+  db:
+    image: postgres:13.2
+    restart: always
+    ports:
+      - "54320:5432"
+    env_file:
+      - ./env/db.env
+  api:
+    build:
+      context: api
+      dockerfile: Dockerfile
+    restart: always
+    ports:  
+      - "8080:8080"
+    env_file:
+      - ./env/api.env
+    depends_on:
+      - db
+  front:
+    build:
+      context: front
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "30000:80"
+    depends_on:
+      - api
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+      - front
