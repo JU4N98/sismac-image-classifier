@@ -161,3 +161,5 @@ cython_debug/
 
 sismac-image-classifier/*
 rgb_to_grey.json
+
+*.keras
