@@ -107,7 +107,6 @@ class Model2():
     
     def predict(self, bytes):
         image = self.normalize(bytes)
-        print(image)
         idx_to_label = [0,3,1]
         for idx, model in enumerate(self.models):
             prediction = model.predict(np.array([image]), verbose=0)[0][0]
@@ -115,7 +114,7 @@ class Model2():
                 return idx_to_label[idx]
         return 2
 
-model = Model2(["./models/2-1-1.keras", "./models/2-2-1.keras", "./models/2-3-1.keras"])\
+model = Model2(["./models/2-1-1.keras", "./models/2-2-1.keras", "./models/2-3-1.keras"])
 
 def predict(images):
     for image in images:
